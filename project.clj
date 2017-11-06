@@ -1,5 +1,5 @@
 (defproject promenade "0.1.0-SNAPSHOT"
-  :description "Take outcome variation in stride in Clojure"
+  :description "Take program design oddities in stride in Clojure"
   :url "https://github.com/kumarshantanu/promenade"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
