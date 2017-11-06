@@ -6,7 +6,7 @@ Take program design oddities in stride in Clojure.
 
 Non-trivial Clojure applications often need to deal with deeply nested conditions, complex error handling and
 potentially missing data. Naively applying Clojure's facilities to such problems may lead to brittle code that
-is hard to reason about. This library provides few fundamental abstractions to decouple the tangled concerns.
+is hard to reason about. This library provides few basic abstractions to decouple the tangled concerns.
 
 ### Goals
 
