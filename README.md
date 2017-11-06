@@ -14,9 +14,9 @@ is hard to reason about. This library provides few basic abstractions to decoupl
 - Provide simple & effective API without the awkwardness of using monads in Clojure
 - Keep the surface area of this library's API small, fun and easy to work with
 
-### Non Goals
+### Non goals
 
-- Failthful implementation of monads
+- Faithful implementation of monads
 - Adapt all known monads (completeness)
 
 ### Implemented features
