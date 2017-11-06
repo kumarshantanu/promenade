@@ -7,7 +7,7 @@
 - [Todo] `mlet` (Haskell's `do` notation equivalent)
 
 
-## [WIP] 0.1.0-alpha1 / 2017-November-??
+## 0.1.0-alpha1 / 2017-November-06
 
 ### Added
 - Context support

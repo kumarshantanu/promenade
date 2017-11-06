@@ -39,7 +39,7 @@ You may find similarities to this library in the following work:
 
 ## Usage
 
-`[promenade "0.1.0-SNAPSHOT"]`
+`[promenade "0.1.0-alpha1"]`
 
 Documentation: TBD
 
