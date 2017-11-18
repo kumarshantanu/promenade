@@ -4,7 +4,16 @@
 
 - [Todo] ClojureScript support
 - [Todo] Adaptation of state monad
-- [Todo] `mlet` (Haskell's `do` notation equivalent)
+- [Todo] Context pattern matching
+  - [Todo] `if-mlet`, `when-mlet`, `cond-mlet`
+  - [Todo] Matchers: `mval`, `mfailure`, `mnothing`, `mthrown`
+- [Todo] Extensibility
+  - Either (Success/Failure)
+    - [TODO] Extension: Via protocol promenade.type.IFailure (impl promenade.type.Failure)
+  - Maybe (Just/Nothing)
+    - [TODO] Extension: Via protocol promenade.type.INothing (impl promenade.type.Nothing)
+  - Trial (Result/Exception)
+    - [TODO] Extension: Via protocol promenade.type.IThrown (impl promenade.type.Thrown)
 
 
 ## 0.1.0-alpha1 / 2017-November-06
