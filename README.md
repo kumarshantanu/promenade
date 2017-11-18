@@ -32,11 +32,7 @@ You may find similarities to this library in the following work:
 - [Failjure](https://github.com/adambard/failjure)
 - [SynThread](https://github.com/LonoCloud/synthread)
 - https://youtu.be/3y7xzH8jB8A?t=1390
-- Monad implementations
-  - [Cats](https://github.com/funcool/cats)
-  - [algo.monads](https://github.com/clojure/algo.monads)
-  - [Fluokitten](http://fluokitten.uncomplicate.org/)
-  - [Morph](https://github.com/blancas/morph)
+- [Various](https://github.com/funcool/cats) [Clojure](https://github.com/clojure/algo.monads) [Monad](http://fluokitten.uncomplicate.org/) [implementations](https://github.com/blancas/morph)
 
 ## Usage
 
