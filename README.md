@@ -6,7 +6,7 @@ Take program design oddities in stride in Clojure.
 
 Non-trivial Clojure applications often need to deal with deeply nested conditions, complex error handling and
 potentially missing data. Naively applying Clojure's facilities to such problems may lead to brittle code that
-is hard to reason about. This library provides few basic abstractions to decouple the tangled concerns.
+is hard to reason about. This library provides few basic mechanisms to decouple the tangled concerns.
 
 ### Goals
 
@@ -32,16 +32,18 @@ You may find similarities to this library in the following work:
 - [Failjure](https://github.com/adambard/failjure)
 - [SynThread](https://github.com/LonoCloud/synthread)
 - https://youtu.be/3y7xzH8jB8A?t=1390
-- [Cats](https://github.com/funcool/cats)
-- [algo.monads](https://github.com/clojure/algo.monads)
-- [Fluokitten](http://fluokitten.uncomplicate.org/)
-- [Morph](https://github.com/blancas/morph)
+- Monad implementations
+  - [Cats](https://github.com/funcool/cats)
+  - [algo.monads](https://github.com/clojure/algo.monads)
+  - [Fluokitten](http://fluokitten.uncomplicate.org/)
+  - [Morph](https://github.com/blancas/morph)
 
 ## Usage
 
 `[promenade "0.1.0-alpha1"]`
 
-Documentation: TBD
+See [Documentation](doc/intro.md)
+
 
 ## License
 
