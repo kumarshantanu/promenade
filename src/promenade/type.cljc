@@ -12,12 +12,29 @@
             [clojure.lang IDeref IRecord])))
 
 
-(defprotocol IContext)
+(defprotocol IContext "Marker protocol for all context types")
 
 
-(defrecord Failure [failure] IContext IDeref (#?(:clj deref :cljs -deref) [_] failure))  ; either
-(defrecord Nothing []        IContext)                                                   ; maybe
-(defrecord Thrown  [thrown]  IContext IDeref (#?(:clj deref :cljs -deref) [_] thrown))   ; thrown
+(defprotocol IFailure "Marker protocol for failure - to be implemented with IDeref")
+(defprotocol INothing "Marker protocol for nothing")
+(defprotocol IThrown  "Marker protocol for thrown - to be implemented with IDeref")
+
+
+(defrecord Failure [failure]
+  IContext
+  IDeref (#?(:clj deref :cljs -deref) [_] failure)
+  IFailure)
+
+
+(defrecord Nothing []
+  IContext
+  INothing)
+
+
+(defrecord Thrown  [thrown]
+  IContext
+  IDeref (#?(:clj deref :cljs -deref) [_] thrown)
+  IThrown)
 
 
 #?(:clj (prefer-method print-method IRecord IDeref))

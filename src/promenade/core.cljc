@@ -13,10 +13,7 @@
   namespace provides unified, standalone and composable mechanism to represent and process such operation outcomes."
   (:require
     [promenade.internal :as i]
-    #?(:cljs [promenade.type :as t :refer [Failure Nothing Thrown]]
-        :clj [promenade.type :as t]))
-  #?(:clj (:import
-            [promenade.type Failure Nothing Thrown])))
+    [promenade.type     :as t]))
 
 
 ;; ----- helpers for making or uncovering context -----
@@ -42,7 +39,7 @@
 (defn fail
   "Turn given argument into 'failure' unless it is already a context."
   ([x] (cond
-         (instance? Failure x)     x
+         (satisfies? t/IFailure x) x
          (satisfies? t/IContext x) (throw (ex-info "Cannot derive failure from other context" {:context x}))
          :otherwise                (t/->Failure x)))
   ([] failure))
@@ -59,7 +56,7 @@
 (defn void
   "Turn given argument into 'nothing' unless it is already a context."
   ([x] (cond
-         (instance? Nothing x)     x
+         (satisfies? t/INothing x) x
          (satisfies? t/IContext x) (throw (ex-info "Cannot turn other context into nothing" {:context x}))
          :otherwise                nothing))
   ([] nothing))
@@ -117,7 +114,7 @@
                       mval
                       (success-f mval)))
   ([mval failure-f success-f] (cond
-                                (instance? Failure mval)     (failure-f (.-failure ^Failure mval))
+                                (satisfies? t/IFailure mval) (failure-f (deref mval))
                                 (satisfies? t/IContext mval) mval
                                 :otherwise                   (success-f mval))))
 
@@ -134,7 +131,7 @@
                    mval
                    (just-f mval)))
   ([mval nothing-f just-f] (cond
-                             (instance? Nothing mval)     (nothing-f)
+                             (satisfies? t/INothing mval) (nothing-f)
                              (satisfies? t/IContext mval) mval
                              :otherwise                   (just-f mval))))
 
@@ -151,7 +148,7 @@
                      mval
                      (result-f mval)))
   ([mval thrown-f result-f] (cond
-                              (instance? Thrown mval)      (thrown-f (.-thrown ^Thrown mval))
+                              (satisfies? t/IThrown mval)  (thrown-f (deref mval))
                               (satisfies? t/IContext mval) mval
                               :otherwise                   (result-f mval))))
 

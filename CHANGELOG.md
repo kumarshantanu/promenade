@@ -8,16 +8,13 @@
 ## [WIP] 0.2.0 / 2017-November-??
 
 - Add ClojureScript support
+- Make context types extensible
+  - Either (Success/Failure): Protocol `promenade.type.IFailure` (impl `promenade.type.Failure`)
+  - Maybe (Just/Nothing):     Protocol `promenade.type.INothing` (impl `promenade.type.Nothing`)
+  - Trial (Result/Exception): Protocol `promenade.type.IThrown`  (impl `promenade.type.Thrown`)
 - [Todo] Context pattern matching
   - [Todo] `if-mlet`, `when-mlet`, `cond-mlet`
   - [Todo] Matchers: `mval`, `mfailure`, `mnothing`, `mthrown`
-- [Todo] Extensibility
-  - Either (Success/Failure)
-    - [TODO] Extension: Via protocol promenade.type.IFailure (impl promenade.type.Failure)
-  - Maybe (Just/Nothing)
-    - [TODO] Extension: Via protocol promenade.type.INothing (impl promenade.type.Nothing)
-  - Trial (Result/Exception)
-    - [TODO] Extension: Via protocol promenade.type.IThrown (impl promenade.type.Thrown)
 
 
 ## 0.1.0 / 2017-November-19
