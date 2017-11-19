@@ -16,7 +16,7 @@
     - [TODO] Extension: Via protocol promenade.type.IThrown (impl promenade.type.Thrown)
 
 
-## 0.1.0-alpha1 / 2017-November-06
+## 0.1.0 / 2017-November-19
 
 ### Added
 - Context support
