@@ -131,9 +131,9 @@ The value or thrown are basically dealt with using the `prom/bind-trial` functio
 You may chain together several thrown-bind operations using macros `trial->`, `trial->>` and `trial-as->`.
 
 
-## Composing over various result types
+## Working with various result types
 
-The various result types and bind variants we discussed above may be composed together to perform composite operations.
+The various result types and bind variants we discussed above may be used together to perform composite operations.
 For example, the code snippet below enhances upon the use-case we saw in success/failure handling.
 
 ```clojure
