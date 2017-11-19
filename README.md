@@ -46,9 +46,9 @@ See [Documentation](doc/intro.md)
 Running tests:
 
 ```bash
-$ lein do clean, test       # run tests in Clojure
+$ lein do clean, test       # run tests in lowest supported Clojure version
 $ lein do clean, clj-test   # run tests in all supported versions of Clojure
-$ lein do clean, cljs-test  # run tests in ClojureScript
+$ lein do clean, cljs-test  # run tests in ClojureScript using NodeJS
 ```
 
 ## License
