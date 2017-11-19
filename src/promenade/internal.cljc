@@ -7,18 +7,26 @@
 ;   You must not remove this notice, or any other, from this software.
 
 
-(ns promenade.internal)
+(ns promenade.internal
+  #?(:clj (:import
+            [clojure.lang IDeref])))
 
 
 (defn expected
   "Throw illegal input exception citing `expectation` and what was `found` did not match. Optionally accept a predicate
   fn to test `found` before throwing the exception."
   ([expectation found]
-    (throw (IllegalArgumentException.
-             (format "Expected %s, but found (%s) %s" expectation (class found) (pr-str found)))))
+    (throw (ex-info
+             (str "Expected " expectation ", but found (" (pr-str (type found)) ") " (pr-str found))
+             {:found found})))
   ([pred expectation found]
     (when-not (pred found)
       (expected expectation found))))
+
+
+(defn derefable? [x]
+  #?(:cljs (satisfies? IDeref x)
+      :clj (instance? IDeref x)))
 
 
 (defn invoke

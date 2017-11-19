@@ -1,6 +1,6 @@
 # promenade
 
-Take program design oddities in stride in Clojure.
+Take program design oddities in stride in Clojure (and ClojureScript).
 
 ## Rationale
 
@@ -36,10 +36,20 @@ You may find similarities to this library in the following work:
 
 ## Usage
 
-Clojars coordinates: `[promenade "0.1.0"]`
+Clojars coordinates: `[promenade "0.2.0-SNAPSHOT"]`
 
 See [Documentation](doc/intro.md)
 
+
+## Development
+
+Running tests:
+
+```bash
+$ lein do clean, test       # run tests in Clojure
+$ lein do clean, clj-test   # run tests in all supported versions of Clojure
+$ lein do clean, cljs-test  # run tests in ClojureScript
+```
 
 ## License
 

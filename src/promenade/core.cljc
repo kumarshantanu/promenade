@@ -13,10 +13,10 @@
   namespace provides unified, standalone and composable mechanism to represent and process such operation outcomes."
   (:require
     [promenade.internal :as i]
-    [promenade.type     :as t])
-  (:import
-    [clojure.lang IDeref]
-    [promenade.type Failure Nothing Thrown]))
+    #?(:cljs [promenade.type :as t :refer [Failure Nothing Thrown]]
+        :clj [promenade.type :as t]))
+  #?(:clj (:import
+            [promenade.type Failure Nothing Thrown])))
 
 
 ;; ----- helpers for making or uncovering context -----
@@ -67,7 +67,12 @@
 
 (defmacro !
   "Evaluate given form and return it; on exception return the exception as thrown result."
-  ([x] `(! Exception ~x))
+  ([x]
+    ;; In CLJS `defmacro` is called by ClojureJVM, hence reader conditionals always choose :clj -
+    ;; so we discover the environment using a hack (:ns &env), which returns truthy for CLJS.
+    ;; Reference: https://groups.google.com/forum/#!topic/clojure/DvIxYnO1QLQ
+    ;; Reference: https://dev.clojure.org/jira/browse/CLJ-1750
+    `(! ~(if (:ns &env) `js/Error `Exception) ~x))
   ([catch-class x] (let [catch-expr    (fn [clazz]
                                          (i/expected symbol? "exception class name" clazz)
                                          `(catch ~clazz ex# (t/->Thrown ex#)))
@@ -86,12 +91,12 @@
 (defn deref-context
   "Deref argument if it is a context, return as it is otherwise."
   ([x] (if (satisfies? t/IContext x)
-         (if (instance? IDeref x)
+         (if (i/derefable? x)
            (deref x)
            (throw (ex-info "Context does not support deref" {:context x})))
          x))
   ([x default] (if (satisfies? t/IContext x)
-                 (if (instance? IDeref x)
+                 (if (i/derefable? x)
                    (deref x)
                    default)
                  x)))
@@ -170,7 +175,7 @@
     trial->"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-either i/expand-> i/expand-> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-either i/expand-> i/expand-> %) forms)))
 
 
 (defmacro either->>
@@ -189,7 +194,8 @@
     trial->>"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-either i/expand->> i/expand->> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-either i/expand->> i/expand->> %)
+         forms)))
 
 
 (defmacro either-as->
@@ -208,7 +214,8 @@
     trial-as->"
   [expr name & forms]
   `(-> ~expr
-     ~@(map #(i/bind-expr bind-either (partial i/expand-as-> name) (partial i/expand-as-> name) %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-either (partial i/expand-as-> name) (partial i/expand-as-> name) %)
+         forms)))
 
 
 (defmacro maybe->
@@ -227,7 +234,8 @@
     trial->"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-maybe i/expand-nothing i/expand-> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-maybe i/expand-nothing i/expand-> %)
+         forms)))
 
 
 (defmacro maybe->>
@@ -246,7 +254,8 @@
     trial->>"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-maybe i/expand-nothing i/expand->> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-maybe i/expand-nothing i/expand->> %)
+         forms)))
 
 
 (defmacro maybe-as->
@@ -265,7 +274,8 @@
     trial-as->"
   [expr name & forms]
   `(-> ~expr
-     ~@(map #(i/bind-expr bind-maybe i/expand-nothing (partial i/expand-as-> name) %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-maybe i/expand-nothing (partial i/expand-as-> name) %)
+         forms)))
 
 
 (defmacro trial->
@@ -284,7 +294,8 @@
     maybe->"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-trial i/expand-> i/expand-> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-trial i/expand-> i/expand-> %)
+         forms)))
 
 
 (defmacro trial->>
@@ -303,7 +314,8 @@
     maybe->>"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-trial i/expand->> i/expand->> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-trial i/expand->> i/expand->> %)
+         forms)))
 
 
 (defmacro trial-as->
@@ -322,4 +334,5 @@
     maybe-as->"
   [expr name & forms]
   `(-> ~expr
-     ~@(map #(i/bind-expr bind-trial (partial i/expand-as-> name) (partial i/expand-as-> name) %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-trial (partial i/expand-as-> name) (partial i/expand-as-> name) %)
+         forms)))

@@ -8,16 +8,16 @@
 
 
 (ns promenade.type
-  (:import
-    [clojure.lang IDeref IRecord]))
+  #?(:clj (:import
+            [clojure.lang IDeref IRecord])))
 
 
 (defprotocol IContext)
 
 
-(defrecord Failure [failure] IContext IDeref (deref [_] failure))  ; either
-(defrecord Nothing []        IContext)                             ; maybe
-(defrecord Thrown  [thrown]  IContext IDeref (deref [_] thrown))   ; thrown
+(defrecord Failure [failure] IContext IDeref (#?(:clj deref :cljs -deref) [_] failure))  ; either
+(defrecord Nothing []        IContext)                                                   ; maybe
+(defrecord Thrown  [thrown]  IContext IDeref (#?(:clj deref :cljs -deref) [_] thrown))   ; thrown
 
 
-(prefer-method print-method IRecord IDeref)
+#?(:clj (prefer-method print-method IRecord IDeref))

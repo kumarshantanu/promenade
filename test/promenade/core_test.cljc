@@ -8,8 +8,15 @@
 
 
 (ns promenade.core-test
-  (:require [clojure.test :refer :all]
-            [promenade.core :as prom]))
+  (:require
+    #?(:cljs [cljs.test    :refer-macros [deftest is testing]]
+        :clj [clojure.test :refer        [deftest is testing]])
+    #?(:cljs [promenade.core :as prom :refer-macros [either-> either->> either-as->
+                                                     maybe->  maybe->>  maybe-as->
+                                                     trial->  trial->>  trial-as-> !]]
+        :clj [promenade.core :as prom :refer        [either-> either->> either-as->
+                                                     maybe->  maybe->>  maybe-as->
+                                                     trial->  trial->>  trial-as-> !]])))
 
 
 (deftest test-bind-either
@@ -24,70 +31,70 @@
 
 (deftest test-either->
   (is (= 4
-        (prom/either-> :foo
+        (either-> :foo
           {:foo 1
            :bar 2}
           [(* 0) (+ 2)]
           inc)))
   (is (= 60
-        (prom/either-> :foo
+        (either-> :foo
           prom/fail
           [{:foo 10
             :bar 20} vector]
           (+ 50))))
   (is (= :foo
-        (prom/either-> :foo
+        (either-> :foo
           prom/fail
           [identity])) "1-element vector applies to the left ('failure' in this case)")
   (is (= :foo
-        (prom/either-> :foo
+        (either-> :foo
           identity
           [identity])) "1-element vector applies to the left ('failure' in this case)"))
 
 
 (deftest test-either->>
   (is (= 2
-        (prom/either->> :foo
+        (either->> :foo
           {:foo 1
            :bar 2}
           [(* 0) (vector 2)]
           first)))
   (is (= 1
-        (prom/either->> :foo
+        (either->> :foo
           {:foo 1
            :bar 2}
           prom/fail
           [(* 0) (vector 2)]
           inc)))
   (is (= [:foo]
-        (prom/either->> :foo
+        (either->> :foo
           prom/fail
           [vector])) "1-element vector applies to the left ('failure' in this case)")
   (is (= :foo
-        (prom/either->> :foo
+        (either->> :foo
           identity
           [vector])) "1-element vector applies to the left ('failure' in this case)"))
 
 
 (deftest test-either-as->
   (is (= 1
-        (prom/either-as-> :foo $
+        (either-as-> :foo $
           ({:foo 1
             :bar 2} $)
           [(* 0 $) (vector $ 2)]
           (first $))))
   (is (= 30
-        (prom/either-as-> :foo $
+        (either-as-> :foo $
           ({:foo 1
             :bar 2} $)
           [(* 0 $) (vector $ 2)]
           30)))
   (is (= [:foo]
-        (prom/either-as-> :foo $
+        (either-as-> :foo $
           (prom/fail [$])
           [$])) "1-element vector applies to the left ('failure' in this case)")
   (is (= [:foo]
-        (prom/either-as-> :foo $
+        (either-as-> :foo $
           (vector $)
           [$])) "1-element vector applies to the left ('failure' in this case)"))
 
@@ -104,146 +111,155 @@
 
 (deftest test-maybe->
   (is (= 4
-        (prom/maybe-> :foo
+        (maybe-> :foo
           {:foo 1
            :bar 2}
           [(* 0) (+ 2)]
           inc)))
   (is (= 60
-        (prom/maybe-> :foo
+        (maybe-> :foo
           prom/void
           [(do 10) vector]
           (+ 50))))
   (is (= :bar
-        (prom/maybe-> :foo
+        (maybe-> :foo
           prom/void
           [(do :bar)])) "1-element vector applies to the left ('nothing' in this case)")
   (is (= :foo
-        (prom/maybe-> :foo
+        (maybe-> :foo
           identity
           [(do :bar)])) "1-element vector applies to the left ('nothing' in this case)"))
 
 
 (deftest test-maybe->>
   (is (= 2
-        (prom/maybe->> :foo
+        (maybe->> :foo
           {:foo 1
            :bar 2}
           [(* 0) (vector 2)]
           first)))
   (is (= 1
-        (prom/maybe->> :foo
+        (maybe->> :foo
           {:foo 1
            :bar 2}
           prom/void
           [(* 0) (vector 2)]
           inc)))
   (is (= 4
-        (prom/maybe->> :foo
+        (maybe->> :foo
           prom/void
           [(do 4)])) "1-element vector applies to the left ('nothing' in this case)")
   (is (= :foo
-        (prom/maybe->> :foo
+        (maybe->> :foo
           identity
           [vector])) "1-element vector applies to the left ('nothing' in this case)"))
 
 
 (deftest test-maybe-as->
   (is (= 1
-        (prom/maybe-as-> :foo $
+        (maybe-as-> :foo $
           ({:foo 1
             :bar 2} $)
           [(do [2 1]) (vector $ 2)]
           (first $))))
   (is (= 30
-        (prom/maybe-as-> :foo $
+        (maybe-as-> :foo $
           ({:foo 1
             :bar 2} $)
           [(do [2 1]) (vector $ 2)]
           30)))
   (is (= :bar
-        (prom/maybe-as-> :foo $
+        (maybe-as-> :foo $
           (prom/void [$])
           [(do :bar)])) "1-element vector applies to the left ('nothing' in this case)")
   (is (= [:foo]
-        (prom/maybe-as-> :foo $
+        (maybe-as-> :foo $
           (vector $)
           [(do :bar)])) "1-element vector applies to the left ('nothing' in this case)"))
 
 
-(defn throwx [^String msg]
-  (prom/! (throw (Exception. msg))))
+(defn throwx [msg]
+  (! (throw #?(:clj (Exception. msg) :cljs (js/Error. msg)) )))
 
 
 (defn exception? [x]
-  (instance? Exception x))
+  (instance? #?(:clj Exception :cljs js/Error) x))
 
 
 (deftest test-trial->
   (is (= 4
-        (prom/trial-> :foo
+        (trial-> :foo
           {:foo 1
            :bar 2}
-          [(instance? Exception) (+ 2)]
+          [exception? (+ 2)]
           inc)))
   (is (= false
-        (prom/trial-> "foo"
+        (trial-> "foo"
           throwx
           [exception? vector]
           not)))
   (is (= true
-        (prom/trial-> :foo
+        (trial-> :foo
           throwx
           [exception?])) "1-element vector applies to the left ('exception' in this case)")
   (is (= :foo
-        (prom/trial-> :foo
+        (trial-> :foo
           identity
           [exception?])) "1-element vector applies to the left ('exception' in this case)"))
 
 
 (deftest test-trial->>
   (is (= 2
-        (prom/trial->> :foo
+        (trial->> :foo
           {:foo 1
            :bar 2}
-          [(instance? Exception) (vector 2)]
+          [(instance? #?(:clj Exception :cljs js/Error)) (vector 2)]
           first)))
   (is (= false
-        (prom/trial->> :foo
+        (trial->> :foo
           {:foo 1
            :bar 2}
           throwx
-          [(instance? Exception) (vector 2)]
+          [(instance? #?(:clj Exception :cljs js/Error)) (vector 2)]
           not)))
   (is (= true
-        (prom/trial->> :foo
+        (trial->> :foo
           throwx
-          [(instance? Exception)])) "1-element vector applies to the left ('exception' in this case)")
+          [(instance? #?(:clj Exception :cljs js/Error))]))
+    "1-element vector applies to the left ('exception' in this case)")
   (is (= :foo
-        (prom/trial->> :foo
+        (trial->> :foo
           identity
-          [(instance? Exception)])) "1-element vector applies to the left ('exception' in this case)"))
+          [(instance? #?(:clj Exception :cljs js/Error))]))
+    "1-element vector applies to the left ('exception' in this case)"))
+
+
+(defn get-ex-msg [e]
+  #?(:cljs (.-message e)
+      :clj (.getMessage ^Exception e) ))
 
 
 (deftest test-trial-as->
   (is (= 1
-        (prom/trial-as-> :foo $
+        (trial-as-> :foo $
           ({:foo 1
             :bar 2} $)
           [(do [2 1]) (vector $ 2)]
           (first $))))
   (is (= "bar-foo"
-        (prom/trial-as-> :foo $
+        (trial-as-> :foo $
           ({:foo 1
             :bar 2} $)
           (throwx "foo")
-          [(.getMessage ^Exception $) (vector $ 2)]
+          [(get-ex-msg $) (vector $ 2)]
           (str "bar-" $))))
   (is (= "foo"
-        (prom/trial-as-> :foo $
+        (trial-as-> :foo $
           (throwx (name $))
-          [(.getMessage ^Exception $)])) "1-element vector applies to the left ('exception' in this case)")
+          [(get-ex-msg $)]))
+    "1-element vector applies to the left ('exception' in this case)")
   (is (= [:foo]
-        (prom/trial-as-> :foo $
+        (trial-as-> :foo $
           (vector $)
-          [(.getMessage ^Exception $)])) "1-element vector applies to the left ('exception' in this case)"))
+          [(get-ex-msg $)]))
+    "1-element vector applies to the left ('exception' in this case)"))

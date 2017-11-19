@@ -7,7 +7,7 @@
 
 ## [WIP] 0.2.0 / 2017-November-??
 
-- [Todo] ClojureScript support
+- Add ClojureScript support
 - [Todo] Context pattern matching
   - [Todo] `if-mlet`, `when-mlet`, `cond-mlet`
   - [Todo] Matchers: `mval`, `mfailure`, `mnothing`, `mthrown`
