@@ -27,9 +27,9 @@ expressed as follows:
 Any regular value that is not failure is considered success.
 
 
-### Handling success and failure outcomes from operations
+### Handling success and failure outcomes
 
-Consider an E-Commerce order placement scenario, where we go from order-ID of a placed order through its fulfilment.
+Consider an E-Commerce order placement scenario, where we go from a placed order through its fulfilment.
 
 ```clojure
 (prom/either->> order-id                  ; begin with ID of the placed order
@@ -40,16 +40,16 @@ Consider an E-Commerce order placement scenario, where we go from order-ID of a 
   fulfil-order)                           ; if there were no failure then initiate order fulfilment
 ```
 
-Here `either->>` is a thread-last (like `clojure.core/->>`) variant of acting on the result of previous step. A
-non-vector expression is treated as a success-handler, which is invoked if the previous step was a success. The
+Here `either->>` is a thread-last (like `clojure.core/->>`) variant of acting on the result of the previous step.
+A non-vector expression is treated as a success-handler, which is invoked if the previous step was a success. The
 `order-id` we begin with is a success that becomes the last argument in the `(fetch-order-details order-id)`
 expression, whose success is fed into `check-inventory`. If the outcome was a failure instead, then it bypasses
 all subsequent success handlers until a failure handler is encountered.
 
-A failure-handler may be specified as a vector form: `[failure-handler]` or `[failure-handler success-handler]`.
-In the snippet above, `(cancel-order order-id inventory-failure)` is invoked only when the `fetch-order-details`
-or `check-inventory` step was a failure. Once the `(cancel-order order-id inventory-failure)` step returns failure
-it is used by `stock-replenish-init` to take corrective action and return a failure again. If `check-inventory`
+A failure-handler may be specified in a vector form: `[failure-handler]` or `[failure-handler success-handler]`.
+In above snippet, `(cancel-order order-id failure)` is invoked only when `fetch-order-details` or `check-inventory`
+returns a failure. Once the `(cancel-order order-id failure)` step returns failure, `stock-replenish-init` is
+called with that failure argument to take corrective action and return a failure again. If `check-inventory`
 was successful then `process-order` is called, followed by `fulfil-order` on success.
 
 #### The either-bind variants
