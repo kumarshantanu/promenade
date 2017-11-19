@@ -16,13 +16,13 @@ is hard to reason about. This library provides few basic mechanisms to decouple 
 
 ### Non goals
 
-- Faithful implementation of monads
+- Be faithful implementation of monads
 - Adapt all known monads (completeness)
 
 ### Implemented features
 
 - Decouple condition checks from conditional action by representing success and failure (called _Either_)
-- Represent available and missing values (called _Maybe_)
+- Represent and deal with available and missing values (called _Maybe_)
 - Avoid imperativeness and coupling of throwing and catching of exceptions (called _Trial_)
 
 ### Other work
@@ -32,11 +32,11 @@ You may find similarities to this library in the following work:
 - [Failjure](https://github.com/adambard/failjure)
 - [SynThread](https://github.com/LonoCloud/synthread)
 - https://youtu.be/3y7xzH8jB8A?t=1390
-- [Various](https://github.com/funcool/cats) [Clojure](https://github.com/clojure/algo.monads) [Monad](http://fluokitten.uncomplicate.org/) [implementations](https://github.com/blancas/morph)
+- [Various](https://github.com/funcool/cats) [Clojure](https://github.com/clojure/algo.monads) [monad](http://fluokitten.uncomplicate.org/) [implementations](https://github.com/blancas/morph)
 
 ## Usage
 
-`[promenade "0.1.0-alpha1"]`
+Clojars coordinates: `[promenade "0.1.0-alpha1"]`
 
 See [Documentation](doc/intro.md)
 
