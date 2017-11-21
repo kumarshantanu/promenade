@@ -1,6 +1,6 @@
 # promenade
 
-Take program design oddities in stride in Clojure (and ClojureScript).
+Take program design oddities in stride in Clojure/ClojureScript.
 
 ## Rationale
 
