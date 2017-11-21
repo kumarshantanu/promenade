@@ -6,8 +6,21 @@ computation at a higher level. You can use Promenade in a new project or refacto
 
 ## Require namespaces
 
+In Clojure:
+
 ```clojure
 (require '[promenade.core :as prom])
+```
+
+In ClojureScript:
+
+```clojure
+(require '[promenade.core :as prom :include-macros true])
+;;
+;; or, its expanded form below
+;;
+(require        '[promenade.core :as prom])
+(require-macros '[promenade.core :as prom])
 ```
 
 
