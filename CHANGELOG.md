@@ -3,18 +3,18 @@
 ## Todo
 
 - [Todo] Adaptation of state monad
+- [Todo] Context pattern matching
+  - [Todo] `mlet`, `if-mlet`, `when-mlet`, `cond-mlet`
+  - [Todo] Matchers: `mfail`, `mnothing`, `mthrown`
 
 
 ## [WIP] 0.2.0 / 2017-November-??
 
 - Add ClojureScript support
 - Make context types extensible
-  - Either (Success/Failure): Protocol `promenade.type.IFailure` (impl `promenade.type.Failure`)
-  - Maybe (Just/Nothing):     Protocol `promenade.type.INothing` (impl `promenade.type.Nothing`)
-  - Trial (Result/Exception): Protocol `promenade.type.IThrown`  (impl `promenade.type.Thrown`)
-- [Todo] Context pattern matching
-  - [Todo] `if-mlet`, `when-mlet`, `cond-mlet`
-  - [Todo] Matchers: `mval`, `mfailure`, `mnothing`, `mthrown`
+  - Failure (Either): Protocol `promenade.type.IFailure`
+  - Nothing (Maybe):  Protocol `promenade.type.INothing`
+  - Thrown  (Trial):  Protocol `promenade.type.IThrown`
 
 
 ## 0.1.0 / 2017-November-19

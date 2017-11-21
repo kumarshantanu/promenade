@@ -22,8 +22,8 @@
 ;;~~~~~~~~~~~~~~~~~~~
 ;; Terminal contexts
 
-(def failure (t/->Failure nil))
-(def nothing (t/->Nothing))
+(def failure (i/->Failure nil))
+(def nothing (i/->Nothing))
 
 
 ;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,7 +41,7 @@
   ([x] (cond
          (satisfies? t/IFailure x) x
          (satisfies? t/IContext x) (throw (ex-info "Cannot derive failure from other context" {:context x}))
-         :otherwise                (t/->Failure x)))
+         :otherwise                (i/->Failure x)))
   ([] failure))
 
 
@@ -50,7 +50,7 @@
   [expr]
   `(try ~expr
      (catch ExceptionInfo ex#
-       (t/->Failure (ex-data ex#)))))
+       (i/->Failure (ex-data ex#)))))
 
 
 (defn void
@@ -72,7 +72,7 @@
     `(! ~(if (:ns &env) `js/Error `Exception) ~x))
   ([catch-class x] (let [catch-expr    (fn [clazz]
                                          (i/expected symbol? "exception class name" clazz)
-                                         `(catch ~clazz ex# (t/->Thrown ex#)))
+                                         `(catch ~clazz ex# (i/->Thrown ex#)))
                          catch-clauses (cond
                                          (symbol? catch-class) [(catch-expr catch-class)]
                                          (vector? catch-class) (map catch-expr catch-class)

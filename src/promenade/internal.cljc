@@ -8,8 +8,10 @@
 
 
 (ns promenade.internal
+  (:require
+    [promenade.type :as t])
   #?(:clj (:import
-            [clojure.lang IDeref])))
+            [clojure.lang IDeref IRecord])))
 
 
 (defn expected
@@ -72,3 +74,26 @@
   (if (list? form)
     (with-meta `(^:once fn* [~name] ~form) (meta form))
     `(^:once fn* [~name] ~form)))
+
+
+;; ----- context implementation -----
+
+
+(defrecord Failure [failure]
+  t/IContext
+  IDeref (#?(:clj deref :cljs -deref) [_] failure)
+  t/IFailure)
+
+
+(defrecord Nothing []
+  t/IContext
+  t/INothing)
+
+
+(defrecord Thrown  [thrown]
+  t/IContext
+  IDeref (#?(:clj deref :cljs -deref) [_] thrown)
+  t/IThrown)
+
+
+#?(:clj (prefer-method print-method IRecord IDeref))
