@@ -8,8 +8,11 @@
 
 
 (ns promenade.core-test
-  (:require [clojure.test :refer :all]
-            [promenade.core :as prom]))
+  (:require
+    #?(:cljs [cljs.test    :refer-macros [deftest is testing]]
+        :clj [clojure.test :refer        [deftest is testing]])
+    #?(:cljs [promenade.core :as prom :include-macros true]
+        :clj [promenade.core :as prom])))
 
 
 (deftest test-bind-either
@@ -171,12 +174,22 @@
           [(do :bar)])) "1-element vector applies to the left ('nothing' in this case)"))
 
 
-(defn throwx [^String msg]
-  (prom/! (throw (Exception. msg))))
+(defn throwx [msg]
+  (prom/! (throw #?(:clj (Exception. msg) :cljs (js/Error. msg)) )))
 
 
 (defn exception? [x]
-  (instance? Exception x))
+  (instance? #?(:clj Exception :cljs js/Error) x))
+
+
+(deftest test-bind-trial
+  (is (= :foo (prom/bind-trial :foo identity)))
+  (is (= true (-> :foo
+                (prom/bind-trial (fn [_] (throwx "test")))
+                (prom/bind-trial exception? vector))) "failure channel")
+  (is (= [20] (-> :foo
+                (prom/bind-trial {:foo 20})
+                (prom/bind-trial {:foo 1000} vector))) "success channel"))
 
 
 (deftest test-trial->
@@ -184,7 +197,7 @@
         (prom/trial-> :foo
           {:foo 1
            :bar 2}
-          [(instance? Exception) (+ 2)]
+          [exception? (+ 2)]
           inc)))
   (is (= false
         (prom/trial-> "foo"
@@ -206,23 +219,30 @@
         (prom/trial->> :foo
           {:foo 1
            :bar 2}
-          [(instance? Exception) (vector 2)]
+          [(instance? #?(:clj Exception :cljs js/Error)) (vector 2)]
           first)))
   (is (= false
         (prom/trial->> :foo
           {:foo 1
            :bar 2}
           throwx
-          [(instance? Exception) (vector 2)]
+          [(instance? #?(:clj Exception :cljs js/Error)) (vector 2)]
           not)))
   (is (= true
         (prom/trial->> :foo
           throwx
-          [(instance? Exception)])) "1-element vector applies to the left ('exception' in this case)")
+          [(instance? #?(:clj Exception :cljs js/Error))]))
+    "1-element vector applies to the left ('exception' in this case)")
   (is (= :foo
         (prom/trial->> :foo
           identity
-          [(instance? Exception)])) "1-element vector applies to the left ('exception' in this case)"))
+          [(instance? #?(:clj Exception :cljs js/Error))]))
+    "1-element vector applies to the left ('exception' in this case)"))
+
+
+(defn get-ex-msg [e]
+  #?(:cljs (.-message e)
+      :clj (.getMessage ^Exception e) ))
 
 
 (deftest test-trial-as->
@@ -237,13 +257,15 @@
           ({:foo 1
             :bar 2} $)
           (throwx "foo")
-          [(.getMessage ^Exception $) (vector $ 2)]
+          [(get-ex-msg $) (vector $ 2)]
           (str "bar-" $))))
   (is (= "foo"
         (prom/trial-as-> :foo $
           (throwx (name $))
-          [(.getMessage ^Exception $)])) "1-element vector applies to the left ('exception' in this case)")
+          [(get-ex-msg $)]))
+    "1-element vector applies to the left ('exception' in this case)")
   (is (= [:foo]
         (prom/trial-as-> :foo $
           (vector $)
-          [(.getMessage ^Exception $)])) "1-element vector applies to the left ('exception' in this case)"))
+          [(get-ex-msg $)]))
+    "1-element vector applies to the left ('exception' in this case)"))

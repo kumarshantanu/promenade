@@ -13,10 +13,7 @@
   namespace provides unified, standalone and composable mechanism to represent and process such operation outcomes."
   (:require
     [promenade.internal :as i]
-    [promenade.type     :as t])
-  (:import
-    [clojure.lang IDeref]
-    [promenade.type Failure Nothing Thrown]))
+    [promenade.type     :as t]))
 
 
 ;; ----- helpers for making or uncovering context -----
@@ -25,8 +22,8 @@
 ;;~~~~~~~~~~~~~~~~~~~
 ;; Terminal contexts
 
-(def failure (t/->Failure nil))
-(def nothing (t/->Nothing))
+(def failure (i/->Failure nil))
+(def nothing (i/->Nothing))
 
 
 ;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,9 +39,9 @@
 (defn fail
   "Turn given argument into 'failure' unless it is already a context."
   ([x] (cond
-         (instance? Failure x)     x
+         (satisfies? t/IFailure x) x
          (satisfies? t/IContext x) (throw (ex-info "Cannot derive failure from other context" {:context x}))
-         :otherwise                (t/->Failure x)))
+         :otherwise                (i/->Failure x)))
   ([] failure))
 
 
@@ -53,13 +50,13 @@
   [expr]
   `(try ~expr
      (catch ExceptionInfo ex#
-       (t/->Failure (ex-data ex#)))))
+       (i/->Failure (ex-data ex#)))))
 
 
 (defn void
   "Turn given argument into 'nothing' unless it is already a context."
   ([x] (cond
-         (instance? Nothing x)     x
+         (satisfies? t/INothing x) x
          (satisfies? t/IContext x) (throw (ex-info "Cannot turn other context into nothing" {:context x}))
          :otherwise                nothing))
   ([] nothing))
@@ -67,10 +64,15 @@
 
 (defmacro !
   "Evaluate given form and return it; on exception return the exception as thrown result."
-  ([x] `(! Exception ~x))
+  ([x]
+    ;; In CLJS `defmacro` is called by ClojureJVM, hence reader conditionals always choose :clj -
+    ;; so we discover the environment using a hack (:ns &env), which returns truthy for CLJS.
+    ;; Reference: https://groups.google.com/forum/#!topic/clojure/DvIxYnO1QLQ
+    ;; Reference: https://dev.clojure.org/jira/browse/CLJ-1750
+    `(! ~(if (:ns &env) `js/Error `Exception) ~x))
   ([catch-class x] (let [catch-expr    (fn [clazz]
                                          (i/expected symbol? "exception class name" clazz)
-                                         `(catch ~clazz ex# (t/->Thrown ex#)))
+                                         `(catch ~clazz ex# (i/->Thrown ex#)))
                          catch-clauses (cond
                                          (symbol? catch-class) [(catch-expr catch-class)]
                                          (vector? catch-class) (map catch-expr catch-class)
@@ -86,12 +88,12 @@
 (defn deref-context
   "Deref argument if it is a context, return as it is otherwise."
   ([x] (if (satisfies? t/IContext x)
-         (if (instance? IDeref x)
+         (if (i/derefable? x)
            (deref x)
            (throw (ex-info "Context does not support deref" {:context x})))
          x))
   ([x default] (if (satisfies? t/IContext x)
-                 (if (instance? IDeref x)
+                 (if (i/derefable? x)
                    (deref x)
                    default)
                  x)))
@@ -112,7 +114,7 @@
                       mval
                       (success-f mval)))
   ([mval failure-f success-f] (cond
-                                (instance? Failure mval)     (failure-f (.-failure ^Failure mval))
+                                (satisfies? t/IFailure mval) (failure-f (deref mval))
                                 (satisfies? t/IContext mval) mval
                                 :otherwise                   (success-f mval))))
 
@@ -129,7 +131,7 @@
                    mval
                    (just-f mval)))
   ([mval nothing-f just-f] (cond
-                             (instance? Nothing mval)     (nothing-f)
+                             (satisfies? t/INothing mval) (nothing-f)
                              (satisfies? t/IContext mval) mval
                              :otherwise                   (just-f mval))))
 
@@ -146,7 +148,7 @@
                      mval
                      (result-f mval)))
   ([mval thrown-f result-f] (cond
-                              (instance? Thrown mval)      (thrown-f (.-thrown ^Thrown mval))
+                              (satisfies? t/IThrown mval)  (thrown-f (deref mval))
                               (satisfies? t/IContext mval) mval
                               :otherwise                   (result-f mval))))
 
@@ -170,7 +172,7 @@
     trial->"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-either i/expand-> i/expand-> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-either i/expand-> i/expand-> %) forms)))
 
 
 (defmacro either->>
@@ -189,7 +191,8 @@
     trial->>"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-either i/expand->> i/expand->> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-either i/expand->> i/expand->> %)
+         forms)))
 
 
 (defmacro either-as->
@@ -208,7 +211,8 @@
     trial-as->"
   [expr name & forms]
   `(-> ~expr
-     ~@(map #(i/bind-expr bind-either (partial i/expand-as-> name) (partial i/expand-as-> name) %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-either (partial i/expand-as-> name) (partial i/expand-as-> name) %)
+         forms)))
 
 
 (defmacro maybe->
@@ -227,7 +231,8 @@
     trial->"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-maybe i/expand-nothing i/expand-> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-maybe i/expand-nothing i/expand-> %)
+         forms)))
 
 
 (defmacro maybe->>
@@ -246,7 +251,8 @@
     trial->>"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-maybe i/expand-nothing i/expand->> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-maybe i/expand-nothing i/expand->> %)
+         forms)))
 
 
 (defmacro maybe-as->
@@ -265,7 +271,8 @@
     trial-as->"
   [expr name & forms]
   `(-> ~expr
-     ~@(map #(i/bind-expr bind-maybe i/expand-nothing (partial i/expand-as-> name) %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-maybe i/expand-nothing (partial i/expand-as-> name) %)
+         forms)))
 
 
 (defmacro trial->
@@ -284,7 +291,8 @@
     maybe->"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-trial i/expand-> i/expand-> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-trial i/expand-> i/expand-> %)
+         forms)))
 
 
 (defmacro trial->>
@@ -303,7 +311,8 @@
     maybe->>"
   [x & forms]
   `(-> ~x
-     ~@(map #(i/bind-expr bind-trial i/expand->> i/expand->> %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-trial i/expand->> i/expand->> %)
+         forms)))
 
 
 (defmacro trial-as->
@@ -322,4 +331,5 @@
     maybe-as->"
   [expr name & forms]
   `(-> ~expr
-     ~@(map #(i/bind-expr bind-trial (partial i/expand-as-> name) (partial i/expand-as-> name) %) forms)))
+     ~@(map #(i/bind-expr 'promenade.core/bind-trial (partial i/expand-as-> name) (partial i/expand-as-> name) %)
+         forms)))

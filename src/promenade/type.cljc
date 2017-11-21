@@ -7,17 +7,12 @@
 ;   You must not remove this notice, or any other, from this software.
 
 
-(ns promenade.type
-  (:import
-    [clojure.lang IDeref IRecord]))
+(ns promenade.type)
 
 
-(defprotocol IContext)
+(defprotocol IContext "Marker protocol for all context types")
 
 
-(defrecord Failure [failure] IContext IDeref (deref [_] failure))  ; either
-(defrecord Nothing []        IContext)                             ; maybe
-(defrecord Thrown  [thrown]  IContext IDeref (deref [_] thrown))   ; thrown
-
-
-(prefer-method print-method IRecord IDeref)
+(defprotocol IFailure "Marker protocol for failure - to be implemented with IDeref")
+(defprotocol INothing "Marker protocol for nothing")
+(defprotocol IThrown  "Marker protocol for thrown - to be implemented with IDeref")
