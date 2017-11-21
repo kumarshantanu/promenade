@@ -8,7 +8,7 @@
   - [Todo] Matchers: `mfail`, `mnothing`, `mthrown`
 
 
-## [WIP] 0.2.0 / 2017-November-??
+## 0.2.0 / 2017-November-21
 
 - Add ClojureScript support
 - Make context types extensible
