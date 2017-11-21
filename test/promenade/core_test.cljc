@@ -182,6 +182,16 @@
   (instance? #?(:clj Exception :cljs js/Error) x))
 
 
+(deftest test-bind-trial
+  (is (= :foo (prom/bind-trial :foo identity)))
+  (is (= true (-> :foo
+                (prom/bind-trial (fn [_] (throwx "test")))
+                (prom/bind-trial exception? vector))) "failure channel")
+  (is (= [20] (-> :foo
+                (prom/bind-trial {:foo 20})
+                (prom/bind-trial {:foo 1000} vector))) "success channel"))
+
+
 (deftest test-trial->
   (is (= 4
         (prom/trial-> :foo
