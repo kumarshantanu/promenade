@@ -40,7 +40,6 @@ Clojars coordinates: `[promenade "0.2.0-SNAPSHOT"]`
 
 See [Documentation](doc/intro.md)
 
-
 ## Development
 
 Running tests:
