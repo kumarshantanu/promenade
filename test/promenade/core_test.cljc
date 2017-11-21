@@ -11,8 +11,8 @@
   (:require
     #?(:cljs [cljs.test    :refer-macros [deftest is testing]]
         :clj [clojure.test :refer        [deftest is testing]])
-    [promenade.core :as prom])
-  #?(:cljs (:require-macros [promenade.core :as prom])))
+    #?(:cljs [promenade.core :as prom :include-macros true]
+        :clj [promenade.core :as prom])))
 
 
 (deftest test-bind-either
