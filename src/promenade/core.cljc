@@ -333,3 +333,139 @@
   `(-> ~expr
      ~@(map #(i/bind-expr 'promenade.core/bind-trial (partial i/expand-as-> name) (partial i/expand-as-> name) %)
          forms)))
+
+
+;; ----- support for matching binding forms ----
+
+
+(defn mfailure
+  "Match argument as Failure, returning a match-result.
+  See:
+    mnothing
+    mthrown
+    mlet
+    if-mlet
+    when-mlet
+    cond-mlet"
+  [x]
+  (if (satisfies? t/IFailure x)
+    (i/->Match true (deref x))
+    (i/->Match false x)))
+
+
+(defn mnothing
+  "Match argument as Nothing, returning a match-result.
+  See:
+    mfailure
+    mthrown
+    mlet
+    if-mlet
+    when-mlet
+    cond-mlet"
+  [x value]
+  (if (satisfies? t/INothing x)
+    (i/->Match true value)
+    (i/->Match false x)))
+
+
+(defn mthrown
+  "Match argument as Thrown, returning a match-result.
+  See:
+    mfailure
+    mnothing
+    mlet
+    if-mlet
+    when-mlet
+    cond-mlet"
+  [x]
+  (if (satisfies? t/IThrown x)
+    (i/->Match true (deref x))
+    (i/->Match false x)))
+
+
+(defmacro mlet
+  "Bind symbols in the binding forms to their respective matching context and evaluate body of code in the lexical
+  scope. If a non-matching context is encountered, return it without proceeding any further.
+  See:
+    mfailure
+    mnothing
+    mthrown
+    if-mlet
+    when-mlet
+    cond-mlet"
+  [bindings & body]
+  (i/expected vector? "vector of binding forms" bindings)
+  (when (odd? (count bindings))
+    (i/expected "even number of binding forms" bindings))
+  (if (empty? bindings)
+    `(do ~@body)
+    (let [[lhs rhs & more] bindings
+          restof-expansion (if (seq more)
+                             [`(mlet [~@more] ~@body)]
+                             body)]
+      (with-meta `(let [rhs# ~rhs
+                        mi?# (i/match-instance? rhs#)]
+                    (if (and mi?# (not (:match? rhs#)))
+                      (:value rhs#)
+                      (let [~lhs (if mi?# (:value rhs#) rhs#)]
+                        ~@restof-expansion)))
+        (or (meta rhs) (meta lhs))))))
+
+
+(defmacro if-mlet
+  "Bind symbols in the binding forms to their respective matching context and evaluate `then` form in the lexical
+  scope. If a non-matching context is encountered, evaluate the `else` form independent of the binding context, or
+  return a promenade.type.INothing instance when `else` is unspecified.
+  See:
+    mfailure
+    mnothing
+    mthrown
+    mlet
+    when-mlet
+    cond-mlet"
+  ([bindings then]
+    `(if-mlet ~bindings ~then nothing))
+  ([bindings then else]
+    (i/expected vector? "vector of binding forms" bindings)
+    (when (odd? (count bindings))
+      (i/expected "even number of binding forms" bindings))
+    `(let [[match?# result#] (i/if-then ~bindings ~then)]
+       (if match?#
+         result#
+         ~else))))
+
+
+(defmacro when-mlet
+  "Bind symbols in the binding forms to their respective matching context and evaluate th body of code in the lexical
+  scope. If a non-matching context is encountered, return a promenade.type.INothing instance.
+  See:
+    mfailure
+    mnothing
+    mthrown
+    mlet
+    if-mlet
+    cond-mlet"
+  [bindings & body]
+  `(if-mlet ~bindings
+     (do ~@body)
+     nothing))
+
+
+(defmacro cond-mlet
+  "Given a set of match-bindings/expression pairs, match each binding vector one by one - upon full match evaluate
+  respective expression in the lexical scope and return the result without proceeding any further. When a binding
+  form is not a vector, evaluate it like an expression and a truthy value triggers evaluating respective expression.
+  When no match is found, return a promenade.type.INothing instance."
+  [& clauses]
+  (when (odd? (count clauses))
+    (i/expected "even number of test/expr clauses" clauses))
+  (if (empty? clauses)
+    `nothing
+    (let [[test expr & more] clauses]
+      (if (vector? test)
+        `(if-mlet ~test
+           ~expr
+           (cond-mlet ~@more))
+        `(if ~test
+           ~expr
+           (cond-mlet ~@more))))))

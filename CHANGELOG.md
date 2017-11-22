@@ -7,9 +7,9 @@
 
 ## [WIP] 0.3.0 / 2017-November-??
 
-- [Todo] Context pattern matching
-  - [Todo] `mlet`, `if-mlet`, `when-mlet`, `cond-mlet`
-  - [Todo] Matchers: `mfail`, `mnothing`, `mthrown`
+- Add context pattern matching support
+  - Matcher fns: `mfailure`, `mnothing`, `mthrown`
+  - Bind macros: `mlet`, `if-mlet`, `when-mlet`, `cond-mlet`
 - [Todo] Utility fn to wrap as thrown
 
 
