@@ -62,6 +62,15 @@
   ([] nothing))
 
 
+(defn thrown
+  "Turn given argument into a 'thrown' unless it is already a context."
+  [x]
+  (cond
+    (satisfies? t/IThrown x)  x
+    (satisfies? t/IContext x) (throw (ex-info "Cannot derive thrown from other context" {:context x}))
+    :otherwise                (i/->Thrown x)))
+
+
 (defmacro !
   "Evaluate given form and return it; on exception return the exception as thrown result."
   ([x]
@@ -280,7 +289,7 @@
   'result' intact.
   Example usage                           Expanded as
   -------------                         | -----------
-  (trial-> (place-order)                  | (-> (place-order)
+  (trial-> (place-order)                | (-> (place-order)
     (check-inventory :foo)              |   (bind-trial (fn [x] (check-inventory x :foo)))
     [(cancel-order :bar) process-order] |   (bind-trial (fn [x] (cancel-order x :bar)) process-order)
     fulfil-order)                       |   (bind-trial fulfil-order))

@@ -10,7 +10,7 @@
 - Add context pattern matching support
   - Matcher fns: `mfailure`, `mnothing`, `mthrown`
   - Bind macros: `mlet`, `if-mlet`, `when-mlet`, `cond-mlet`
-- [Todo] Utility fn to wrap as thrown
+- Add utility fn `thrown` to wrap as thrown
 
 
 ## 0.2.0 / 2017-November-21
