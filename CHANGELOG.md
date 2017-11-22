@@ -3,9 +3,14 @@
 ## Todo
 
 - [Todo] Adaptation of state monad
+
+
+## [WIP] 0.3.0 / 2017-November-??
+
 - [Todo] Context pattern matching
   - [Todo] `mlet`, `if-mlet`, `when-mlet`, `cond-mlet`
   - [Todo] Matchers: `mfail`, `mnothing`, `mthrown`
+- [Todo] Utility fn to wrap as thrown
 
 
 ## 0.2.0 / 2017-November-21
