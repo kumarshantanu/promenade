@@ -97,3 +97,30 @@
 
 
 #?(:clj (prefer-method print-method IRecord IDeref))
+
+
+;; ----- context matching support -----
+
+
+(defrecord Match [match? value])
+
+
+(defn match-instance? [x] (instance? Match x))
+
+
+(defmacro if-then
+  "Evaulate `then` expression in lexical scope and return [true then] when all bindings match, else return [false nil]."
+  [bindings then]
+  (if (empty? bindings)
+    [true then]
+    (let [[lhs rhs & more] bindings
+          restof-expansion (if (seq more)
+                             [`(if-then [~@more] ~then)]
+                             [[true then]])]
+      (with-meta `(let [rhs# ~rhs
+                        mi?# (match-instance? rhs#)]
+                    (if (and mi?# (not (:match? rhs#)))
+                      [false nil]
+                      (let [~lhs (if mi?# (:value rhs#) rhs#)]
+                        ~@restof-expansion)))
+        (or (meta rhs) (meta lhs))))))

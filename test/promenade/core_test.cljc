@@ -15,6 +15,28 @@
         :clj [promenade.core :as prom])))
 
 
+(defn throwable [msg]
+  #?(:clj (Exception. msg) :cljs (js/Error. msg)))
+
+
+(deftest test-context-util
+  (testing "Positive tests"
+    (is ((every-pred prom/failure? prom/context?) (prom/fail :fail)))
+    (is ((every-pred prom/failure? prom/context?) prom/failure))
+    (is ((every-pred prom/nothing? prom/context?) prom/nothing))
+    (is ((every-pred prom/nothing? prom/context?) (prom/void :foo)))
+    (is ((every-pred prom/thrown?  prom/context?) (prom/thrown (throwable "test"))))
+    (is ((every-pred prom/thrown?  prom/context?) (prom/! (throw (throwable "test"))))))
+  (testing "Negative tests"
+    (is (not (prom/failure? prom/nothing)))
+    (is (not (prom/failure? :foo)))
+    (is (not (prom/nothing? (prom/fail :fail))))
+    (is (not (prom/nothing? :foo)))
+    (is (not (prom/thrown?  (prom/void :foo))))
+    (is (not (prom/thrown?  :foo)))
+    (is (not (prom/context? :foo)))))
+
+
 (deftest test-bind-either
   (is (= :foo (prom/bind-either :foo identity)))
   (is (= 1000 (-> :foo
@@ -175,7 +197,7 @@
 
 
 (defn throwx [msg]
-  (prom/! (throw #?(:clj (Exception. msg) :cljs (js/Error. msg)) )))
+  (prom/! (throw (throwable msg))))
 
 
 (defn exception? [x]
@@ -269,3 +291,106 @@
           (vector $)
           [(get-ex-msg $)]))
     "1-element vector applies to the left ('exception' in this case)"))
+
+
+(deftest test-mlet
+  (testing "Match success"
+    (is (= 10 (prom/mlet [] 10)))
+    (is (= 11 (prom/mlet [a 10] (inc a))))
+    (is (nil? (prom/mlet [a nil] a)))
+    (is (= 30 (prom/mlet [a 10
+                          b 20] (+ a b))))
+    (is (= [:foo :bar] (prom/mlet [a (prom/mfailure (prom/fail :foo))] [a :bar])))
+    (is (= [:foo :bar] (prom/mlet [a (prom/mfailure (prom/fail :foo))
+                                   b (prom/mnothing prom/nothing :bar)] [a b]))))
+  (testing "Match failure"
+    (is (= 10 (prom/mlet [a (prom/mfailure 10)] (inc a))))
+    (is (= 20 (prom/mlet [a 10
+                          b (prom/mfailure 20)] (+ a b))))
+    (is (= 30 (prom/mlet [a (prom/mfailure (prom/fail :foo))
+                          b 20
+                          c (prom/mnothing 30 :bar)] [a b c])))))
+
+
+(deftest test-if-mlet
+  (testing "Match success"
+    (is (= 10 (prom/if-mlet [] 10)))
+    (is (= 11 (prom/if-mlet [a 10] (inc a) 10)))
+    (is (= 30 (prom/if-mlet [a 10
+                             b 20] (+ a b) 10)))
+    (is (= 30 (prom/if-mlet [a 10
+                             b (prom/mfailure (prom/fail 20))] (+ a b))))
+    (is (= 60 (prom/if-mlet [a 10
+                             b 20
+                             c 30] (+ a b c))))
+    (is (= 60 (prom/if-mlet [a (prom/mfailure (prom/fail 10))
+                             b 20
+                             c (prom/mnothing prom/nothing 30)] (+ a b c) 50))))
+  (testing "Match failure, with else specified"
+    (is (= 10 (prom/if-mlet [a (prom/mfailure 20)] a 10)))
+    (is (= 10 (prom/if-mlet [a 10
+                             b (prom/mfailure 20)] (+ a b) 10)))
+    (is (= 10 (prom/if-mlet [a (prom/mfailure (prom/fail 10))
+                             b 20
+                             c (prom/mfailure 20)] (+ a b c) 10))))
+  (testing "Match failure, with else unspecified"
+    (is (= prom/nothing (prom/if-mlet [a (prom/mfailure 20)] a)))
+    (is (= prom/nothing (prom/if-mlet [a 10
+                                       b (prom/mfailure 20)] (+ a b))))
+    (is (= prom/nothing (prom/if-mlet [a (prom/mfailure (prom/fail 10))
+                                       b 20
+                                       c (prom/mfailure 20)] (+ a b c))))))
+
+
+(deftest test-when-mlet
+  (testing "Match success"
+    (is (= 20 (prom/when-mlet [] 10 20)))
+    (is (= 11 (prom/when-mlet [a 10] (inc a))))
+    (is (= 10 (prom/when-mlet [a 10
+                               b 20] (+ a b) 10)))
+    (is (= 30 (prom/when-mlet [a 10
+                               b (prom/mfailure (prom/fail 20))] (+ a b))))
+    (is (= 60 (prom/when-mlet [a 10
+                               b 20
+                               c 30] (+ a b c))))
+    (is (= 50 (prom/when-mlet [a (prom/mfailure (prom/fail 10))
+                               b 20
+                               c (prom/mnothing prom/nothing 30)] (+ a b c) 50))))
+  (testing "Match failure"
+    (is (= prom/nothing (prom/when-mlet [a (prom/mfailure 10)] a)))
+    (is (= prom/nothing (prom/when-mlet [a 10
+                                         b (prom/mfailure 20)] (+ a b))))
+    (is (= prom/nothing (prom/when-mlet [a 10
+                                         b 20
+                                         c (prom/mfailure 30)] (+ a b c))))))
+
+
+(deftest test-cond-mlet
+  (testing "Match success"
+    (is (= 10 (prom/cond-mlet
+                :foo 10)))
+    (is (= 11 (prom/cond-mlet
+                [a 10] (inc a))))
+    (is (= 30 (prom/cond-mlet
+                [a 10
+                 b 20] (+ a b))))
+    (is (= 20 (prom/cond-mlet
+                [a 10
+                 b (prom/mfailure 20)] (+ a b)
+                [a 40
+                 b 20] (- a b))))
+    (is (= 50 (prom/cond-mlet
+                [a 10
+                 b (prom/mfailure 20)] (+ a b)
+                [a 40
+                 b (prom/mthrown 20)] (- a b)
+                :else 50))))
+  (testing "Match failure"
+    (is (= prom/nothing (prom/cond-mlet)))
+    (is (= prom/nothing (prom/cond-mlet
+                          false 10)))
+    (is (= prom/nothing (prom/cond-mlet
+                          [a (prom/mfailure 10)] (inc a))))
+    (is (= prom/nothing (prom/cond-mlet
+                          [a (prom/mfailure 10)] (inc a)
+                          [a (prom/mthrown 20)]  (inc a))))))

@@ -1,6 +1,6 @@
 # promenade
 
-Take program design oddities in stride in Clojure/ClojureScript.
+Take program design oddities in stride with Clojure/ClojureScript.
 
 ## Rationale
 
@@ -18,6 +18,7 @@ is hard to reason about. This library provides few basic mechanisms to decouple 
 
 - Be faithful implementation of monads
 - Adapt all known monads (completeness)
+- Be limited to monadic ideas
 
 ### Implemented features
 
@@ -31,12 +32,12 @@ You may find similarities to this library in the following work:
 
 - [Failjure](https://github.com/adambard/failjure)
 - [SynThread](https://github.com/LonoCloud/synthread)
-- https://youtu.be/3y7xzH8jB8A?t=1390
+- [Either-monad adaptation](https://youtu.be/3y7xzH8jB8A?t=1390)
 - [Various](https://github.com/funcool/cats) [Clojure](https://github.com/clojure/algo.monads) [monad](http://fluokitten.uncomplicate.org/) [implementations](https://github.com/blancas/morph)
 
 ## Usage
 
-Clojars coordinates: `[promenade "0.2.0"]`
+Clojars coordinates: `[promenade "0.3.0-SNAPSHOT"]`
 
 See [Documentation](doc/intro.md)
 

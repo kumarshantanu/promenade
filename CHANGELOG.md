@@ -3,9 +3,15 @@
 ## Todo
 
 - [Todo] Adaptation of state monad
-- [Todo] Context pattern matching
-  - [Todo] `mlet`, `if-mlet`, `when-mlet`, `cond-mlet`
-  - [Todo] Matchers: `mfail`, `mnothing`, `mthrown`
+
+
+## [WIP] 0.3.0 / 2017-November-??
+
+- Add context pattern matching support
+  - Matcher fns: `mfailure`, `mnothing`, `mthrown`
+  - Bind macros: `mlet`, `if-mlet`, `when-mlet`, `cond-mlet`
+- Add utility fn `thrown` to wrap as thrown
+- Add predicate fns for context types
 
 
 ## 0.2.0 / 2017-November-21
