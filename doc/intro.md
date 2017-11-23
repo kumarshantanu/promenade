@@ -37,7 +37,7 @@ expressed as follows:
             :stock-qty 1})
 ```
 
-Any regular value that is not failure is considered success.
+Any regular value that is not _Failure_ (predicate `prom/failure?`) is considered success.
 
 
 ### Handling success and failure outcomes
@@ -83,8 +83,8 @@ You may chain together several either-bind operations using macros `either->`, `
 ### Expressing a value or its absence thereof
 
 Some times you may want to represent the absence of a value, expressed as `prom/nothing`. This is a special
-value that may participate in other bind chains in Promenade. Any regular value that is not nothing is considered
-presence of a value.
+value that may participate in other bind chains in Promenade. Any regular value that is not _Nothing_
+(predicate `prom/nothing?`) is considered presence of a value.
 
 
 ### Handling presence or absence of a value
@@ -122,8 +122,8 @@ You may chain together several maybe-bind operations using macros `maybe->`, `ma
 ### Expressing a value or thrown exception
 
 We regularly deal with pre-written and third-party code that may throw exceptions. We can capture exceptions
-and return as thrown using the `prom/!` macro, e.g. `(prom/! (third-party-code))`. Any other regular value is
-considered not a thrown.
+and return as _Thrown_ using the `prom/!` macro, e.g. `(prom/! (third-party-code))`, or construct one using
+`prom/thrown` function. Any other regular value is considered not a _Thrown_ (predicate `prom/thrown?`).
 
 
 ### Handling value or thrown exception
