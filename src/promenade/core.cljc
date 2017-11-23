@@ -16,7 +16,16 @@
     [promenade.type     :as t]))
 
 
-;; ----- helpers for making or uncovering context -----
+;; ----- Context utility -----
+
+
+;;~~~~~~~~~~~~~~~~~~~~
+;; Context predicates
+
+(defn failure? [x] "Return true if argument is a Failure, false otherwise." (satisfies? t/IFailure x))
+(defn nothing? [x] "Return true if argument is a Nothing, false otherwise." (satisfies? t/INothing x))
+(defn thrown?  [x] "Return true if argument is a Thrown, false otherwise."  (satisfies? t/IThrown x))
+(defn context? [x] "Return true if argument is a Context, false otherwise." (satisfies? t/IContext x))
 
 
 ;;~~~~~~~~~~~~~~~~~~~
@@ -39,9 +48,9 @@
 (defn fail
   "Turn given argument into 'failure' unless it is already a context."
   ([x] (cond
-         (satisfies? t/IFailure x) x
-         (satisfies? t/IContext x) (throw (ex-info "Cannot derive failure from other context" {:context x}))
-         :otherwise                (i/->Failure x)))
+         (failure? x) x
+         (context? x) (throw (ex-info "Cannot derive failure from other context" {:context x}))
+         :otherwise   (i/->Failure x)))
   ([] failure))
 
 
@@ -56,9 +65,9 @@
 (defn void
   "Turn given argument into 'nothing' unless it is already a context."
   ([x] (cond
-         (satisfies? t/INothing x) x
-         (satisfies? t/IContext x) (throw (ex-info "Cannot turn other context into nothing" {:context x}))
-         :otherwise                nothing))
+         (nothing? x) x
+         (context? x) (throw (ex-info "Cannot turn other context into nothing" {:context x}))
+         :otherwise   nothing))
   ([] nothing))
 
 
@@ -66,9 +75,9 @@
   "Turn given argument into a 'thrown' unless it is already a context."
   [x]
   (cond
-    (satisfies? t/IThrown x)  x
-    (satisfies? t/IContext x) (throw (ex-info "Cannot derive thrown from other context" {:context x}))
-    :otherwise                (i/->Thrown x)))
+    (thrown? x)  x
+    (context? x) (throw (ex-info "Cannot derive thrown from other context" {:context x}))
+    :otherwise   (i/->Thrown x)))
 
 
 (defmacro !
@@ -96,19 +105,19 @@
 
 (defn deref-context
   "Deref argument if it is a context, return as it is otherwise."
-  ([x] (if (satisfies? t/IContext x)
+  ([x] (if (context? x)
          (if (i/derefable? x)
            (deref x)
            (throw (ex-info "Context does not support deref" {:context x})))
          x))
-  ([x default] (if (satisfies? t/IContext x)
+  ([x default] (if (context? x)
                  (if (i/derefable? x)
                    (deref x)
                    default)
                  x)))
 
 
-;; ----- bind -----
+;; ----- Bind -----
 
 
 (defn bind-either
@@ -119,13 +128,13 @@
     either-as->
     bind-maybe
     bind-thrown"
-  ([mval success-f] (if (satisfies? t/IContext mval)
+  ([mval success-f] (if (context? mval)
                       mval
                       (success-f mval)))
   ([mval failure-f success-f] (cond
-                                (satisfies? t/IFailure mval) (failure-f (deref mval))
-                                (satisfies? t/IContext mval) mval
-                                :otherwise                   (success-f mval))))
+                                (failure? mval) (failure-f (deref mval))
+                                (context? mval) mval
+                                :otherwise      (success-f mval))))
 
 
 (defn bind-maybe
@@ -136,13 +145,13 @@
     maybe-as->
     bind-either
     bind-thrown"
-  ([mval just-f] (if (satisfies? t/IContext mval)
+  ([mval just-f] (if (context? mval)
                    mval
                    (just-f mval)))
   ([mval nothing-f just-f] (cond
-                             (satisfies? t/INothing mval) (nothing-f)
-                             (satisfies? t/IContext mval) mval
-                             :otherwise                   (just-f mval))))
+                             (nothing? mval) (nothing-f)
+                             (context? mval) mval
+                             :otherwise      (just-f mval))))
 
 
 (defn bind-trial
@@ -153,16 +162,16 @@
     trial-as->
     bind-either
     bind-maybe"
-  ([mval result-f] (if (satisfies? t/IContext mval)
+  ([mval result-f] (if (context? mval)
                      mval
                      (result-f mval)))
   ([mval thrown-f result-f] (cond
-                              (satisfies? t/IThrown mval)  (thrown-f (deref mval))
-                              (satisfies? t/IContext mval) mval
-                              :otherwise                   (result-f mval))))
+                              (thrown? mval)  (thrown-f (deref mval))
+                              (context? mval) mval
+                              :otherwise      (result-f mval))))
 
 
-;; ----- pipeline macros -----
+;; ----- Pipeline macros -----
 
 
 (defmacro either->
@@ -344,7 +353,7 @@
          forms)))
 
 
-;; ----- support for matching binding forms ----
+;; ----- Match binding ----
 
 
 (defn mfailure
@@ -357,7 +366,7 @@
     when-mlet
     cond-mlet"
   [x]
-  (if (satisfies? t/IFailure x)
+  (if (failure? x)
     (i/->Match true (deref x))
     (i/->Match false x)))
 
@@ -372,7 +381,7 @@
     when-mlet
     cond-mlet"
   [x value]
-  (if (satisfies? t/INothing x)
+  (if (nothing? x)
     (i/->Match true value)
     (i/->Match false x)))
 
@@ -387,7 +396,7 @@
     when-mlet
     cond-mlet"
   [x]
-  (if (satisfies? t/IThrown x)
+  (if (thrown? x)
     (i/->Match true (deref x))
     (i/->Match false x)))
 
