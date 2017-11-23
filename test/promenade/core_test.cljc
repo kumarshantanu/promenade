@@ -15,6 +15,28 @@
         :clj [promenade.core :as prom])))
 
 
+(defn throwable [msg]
+  #?(:clj (Exception. msg) :cljs (js/Error. msg)))
+
+
+(deftest test-context-util
+  (testing "Positive tests"
+    (is ((every-pred prom/failure? prom/context?) (prom/fail :fail)))
+    (is ((every-pred prom/failure? prom/context?) prom/failure))
+    (is ((every-pred prom/nothing? prom/context?) prom/nothing))
+    (is ((every-pred prom/nothing? prom/context?) (prom/void :foo)))
+    (is ((every-pred prom/thrown?  prom/context?) (prom/thrown (throwable "test"))))
+    (is ((every-pred prom/thrown?  prom/context?) (prom/! (throw (throwable "test"))))))
+  (testing "Negative tests"
+    (is (not (prom/failure? prom/nothing)))
+    (is (not (prom/failure? :foo)))
+    (is (not (prom/nothing? (prom/fail :fail))))
+    (is (not (prom/nothing? :foo)))
+    (is (not (prom/thrown?  (prom/void :foo))))
+    (is (not (prom/thrown?  :foo)))
+    (is (not (prom/context? :foo)))))
+
+
 (deftest test-bind-either
   (is (= :foo (prom/bind-either :foo identity)))
   (is (= 1000 (-> :foo
@@ -175,7 +197,7 @@
 
 
 (defn throwx [msg]
-  (prom/! (throw #?(:clj (Exception. msg) :cljs (js/Error. msg)) )))
+  (prom/! (throw (throwable msg))))
 
 
 (defn exception? [x]
