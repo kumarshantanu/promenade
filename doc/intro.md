@@ -160,3 +160,76 @@ For example, the code snippet below enhances upon the use-case we saw in success
   (prom/maybe->   [not-found-error])
   (prom/trial->   [generate-error]))
 ```
+
+## Granular flexibility with matchers
+
+The pipeline-threading macros we saw in the sections above are great for readability and linear use-cases. However,
+at times the use-case is not linear and we need to match and refer intermediate results. For example, what if you
+need to access the previous step's result and also one from three steps earlier? What if you also need to know if
+an error was handled and recovered from in one of the previous steps? In such cases we can get to a lower level by
+using one of the following match-bind macros.
+
+### `mlet`
+
+The `mlet` macro is a lot like `clojure.core/let`, with the difference that it always binds to a matching result.
+Whenever a non-matching result is found, `mlet` immediately returns it without proceeding any further. The following
+snippet demonstrates the implicit matcher, which only proceeds on successful result - it aborts if at any point
+there's a non-success result.
+
+```clojure
+(prom/mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts mlet
+            stock (check-inventory (:items order)) ; may fail, `stock` binds to success, failure aborts mlet
+            f-ord (process-order order stock)]
+  (fulfil-order f-ord))
+```
+
+You may also specify an exlicit matcher (e.g. `prom/mnothing` - notice the `m` prefix):
+
+```clojure
+(prom/mlet [cached (prom/mnothing (find-cached-order order-id) :absent) ; aborts on success, continues on not-found
+            order  (find-order-details-from-db order-id)]               ; aborts on failure, continues on success
+  (update-cache order-id order)                                         ; we don't care this call fails or succeeds
+  order)
+```
+
+### `if-mlet` and `when-mlet`
+
+We saw that `mlet` aborts on the first mismatch, but we often need to specify what to do on encountering a mismatch.
+This is achieved using `if-mlet`, which is illustrated using the snippet below:
+
+```clojure
+(prom/if-mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts mlet
+               stock (check-inventory (:items order)) ; may fail, `stock` binds to success, failure aborts mlet
+               f-ord (process-order order stock)]
+  (fulfil-order f-ord)
+  (prom/fail {:module :order-processing
+              :order-id order-id}))
+```
+
+Here we return a failure in the _else_ part of `if-mlet`. Now, if we see a similar snippet using `when-mlet` it
+returns `nothing` on non-match:
+
+```clojure
+(prom/when-mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts mlet
+                 stock (check-inventory (:items order)) ; may fail, `stock` binds to success, failure aborts mlet
+                 f-ord (process-order order stock)]
+  (println "Fulfilling order:" order-id)
+  (fulfil-order f-ord))
+```
+
+### `cond-mlet`
+
+Some times you may need to match several combinations of results, which may be done using `cond-mlet`. In the snippet
+below we post and schedule a job and then try to determine the composite status:
+
+```clojure
+(let [job (post-job job-details)
+      sch (schedule-job job)]
+  (prom/cond-mlet
+    [j job
+     s sch]                 {:status :sucess
+                             :job-id (:job-id sch)}
+    [j job
+     s (prom/mfailure sch)] {:status :partial-success}
+    :else                   (prom/fail :failure)))
+```
