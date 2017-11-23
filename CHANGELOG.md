@@ -5,7 +5,7 @@
 - [Todo] Adaptation of state monad
 
 
-## [WIP] 0.3.0 / 2017-November-??
+## 0.3.0 / 2017-November-23
 
 - Add context pattern matching support
   - Matcher fns: `mfailure`, `mnothing`, `mthrown`
