@@ -186,9 +186,9 @@ there's a non-success result.
 You may also specify an exlicit matcher (e.g. `prom/mnothing` - notice the `m` prefix):
 
 ```clojure
-(prom/mlet [cached (prom/mnothing (find-cached-order order-id) :absent) ; aborts on success, continues on not-found
-            order  (find-order-details-from-db order-id)]               ; aborts on failure, continues on success
-  (update-cache order-id order)                                         ; we don't care this call fails or succeeds
+(prom/mlet [cached (prom/mnothing (find-cached-order order-id) :absent) ; success aborts, not-found continues
+            order  (find-order-details-from-db order-id)]               ; failure aborts, success continues
+  (update-cache order-id order)                                         ; don't care call fails or succeeds
   order)
 ```
 
@@ -198,8 +198,8 @@ We saw that `mlet` aborts on the first mismatch, but we often need to specify wh
 This is achieved using `if-mlet`, which is illustrated using the snippet below:
 
 ```clojure
-(prom/if-mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts mlet
-               stock (check-inventory (:items order)) ; may fail, `stock` binds to success, failure aborts mlet
+(prom/if-mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` -> else
+               stock (check-inventory (:items order)) ; may fail, `stock` binds to success, failure -> else
                f-ord (process-order order stock)]
   (fulfil-order f-ord)
   (prom/fail {:module :order-processing
@@ -210,8 +210,8 @@ Here we return a failure in the _else_ part of `if-mlet`. Now, if we see a simil
 returns `nothing` on non-match:
 
 ```clojure
-(prom/when-mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts mlet
-                 stock (check-inventory (:items order)) ; may fail, `stock` binds to success, failure aborts mlet
+(prom/when-mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts
+                 stock (check-inventory (:items order)) ; may fail, `stock` binds to success, failure aborts
                  f-ord (process-order order stock)]
   (println "Fulfilling order:" order-id)
   (fulfil-order f-ord))
