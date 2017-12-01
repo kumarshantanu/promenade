@@ -5,6 +5,11 @@
 - [Todo] Adaptation of state monad
 
 
+## [WIP] 0.3.1 / 2017-December-??
+
+- [TODO] Fix issue where `mlet`-and-fiends do not consider a context value to be a non-match
+
+
 ## 0.3.0 / 2017-November-23
 
 - Add context pattern matching support
