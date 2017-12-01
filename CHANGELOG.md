@@ -5,7 +5,7 @@
 - [Todo] Adaptation of state monad
 
 
-## [WIP] 0.3.1 / 2017-December-??
+## 0.3.1 / 2017-December-01
 
 - Fix issue where matching macros do not consider a context value to be a non-match
   - `mlet`
