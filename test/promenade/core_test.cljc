@@ -303,7 +303,12 @@
     (is (= [:foo :bar] (prom/mlet [a (prom/mfailure (prom/fail :foo))] [a :bar])))
     (is (= [:foo :bar] (prom/mlet [a (prom/mfailure (prom/fail :foo))
                                    b (prom/mnothing prom/nothing :bar)] [a b]))))
-  (testing "Match failure"
+  (testing "Match implicit failure"
+    (is (= (prom/fail 10) (prom/mlet [a (prom/fail 10)] :foo)))
+    (is (= prom/nothing (prom/mlet [a prom/nothing] :foo)))
+    (is (= (prom/thrown 10) (prom/mlet [a (prom/thrown 10)] :foo)))
+    )
+  (testing "Match explicit failure"
     (is (= 10 (prom/mlet [a (prom/mfailure 10)] (inc a))))
     (is (= 20 (prom/mlet [a 10
                           b (prom/mfailure 20)] (+ a b))))

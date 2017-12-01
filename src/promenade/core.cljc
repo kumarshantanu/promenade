@@ -425,8 +425,10 @@
                         mi?# (i/match-instance? rhs#)]
                     (if (and mi?# (not (:match? rhs#)))
                       (:value rhs#)
-                      (let [~lhs (if mi?# (:value rhs#) rhs#)]
-                        ~@restof-expansion)))
+                      (if (context? rhs#)
+                        rhs#
+                        (let [~lhs (if mi?# (:value rhs#) rhs#)]
+                          ~@restof-expansion))))
         (or (meta rhs) (meta lhs))))))
 
 
