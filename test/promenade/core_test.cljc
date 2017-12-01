@@ -306,8 +306,7 @@
   (testing "Match implicit failure"
     (is (= (prom/fail 10) (prom/mlet [a (prom/fail 10)] :foo)))
     (is (= prom/nothing (prom/mlet [a prom/nothing] :foo)))
-    (is (= (prom/thrown 10) (prom/mlet [a (prom/thrown 10)] :foo)))
-    )
+    (is (= (prom/thrown 10) (prom/mlet [a (prom/thrown 10)] :foo))))
   (testing "Match explicit failure"
     (is (= 10 (prom/mlet [a (prom/mfailure 10)] (inc a))))
     (is (= 20 (prom/mlet [a 10
@@ -331,6 +330,13 @@
     (is (= 60 (prom/if-mlet [a (prom/mfailure (prom/fail 10))
                              b 20
                              c (prom/mnothing prom/nothing 30)] (+ a b c) 50))))
+  (testing "Match implicit failure"
+    (is (= prom/nothing (prom/if-mlet [a (prom/fail 10)] :foo)))
+    (is (= :bar         (prom/if-mlet [a (prom/fail 10)] :foo :bar)))
+    (is (= prom/nothing (prom/if-mlet [a prom/nothing] :foo)))
+    (is (= :bar         (prom/if-mlet [a prom/nothing] :foo :bar)))
+    (is (= prom/nothing (prom/if-mlet [a (prom/thrown 10)] :foo)))
+    (is (= :bar         (prom/if-mlet [a (prom/thrown 10)] :foo :bar))))
   (testing "Match failure, with else specified"
     (is (= 10 (prom/if-mlet [a (prom/mfailure 20)] a 10)))
     (is (= 10 (prom/if-mlet [a 10
@@ -361,6 +367,10 @@
     (is (= 50 (prom/when-mlet [a (prom/mfailure (prom/fail 10))
                                b 20
                                c (prom/mnothing prom/nothing 30)] (+ a b c) 50))))
+  (testing "Match implicit failure"
+    (is (= prom/nothing (prom/when-mlet [a (prom/fail 10)] :foo)))
+    (is (= prom/nothing (prom/when-mlet [a prom/nothing] :foo)))
+    (is (= prom/nothing (prom/when-mlet [a (prom/thrown 10)] :foo))))
   (testing "Match failure"
     (is (= prom/nothing (prom/when-mlet [a (prom/mfailure 10)] a)))
     (is (= prom/nothing (prom/when-mlet [a 10
@@ -390,6 +400,13 @@
                 [a 40
                  b (prom/mthrown 20)] (- a b)
                 :else 50))))
+  (testing "Match implicit failure"
+    (is (= prom/nothing (prom/cond-mlet [a (prom/fail 10)] :foo)))
+    (is (= :bar         (prom/cond-mlet [a (prom/fail 10)] :foo :else :bar)))
+    (is (= prom/nothing (prom/cond-mlet [a prom/nothing] :foo)))
+    (is (= :bar         (prom/cond-mlet [a prom/nothing] :foo :else :bar)))
+    (is (= prom/nothing (prom/cond-mlet [a (prom/thrown 10)] :foo)))
+    (is (= :bar         (prom/cond-mlet [a (prom/thrown 10)] :foo :else :bar))))
   (testing "Match failure"
     (is (= prom/nothing (prom/cond-mlet)))
     (is (= prom/nothing (prom/cond-mlet

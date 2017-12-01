@@ -119,7 +119,8 @@
                              [[true then]])]
       (with-meta `(let [rhs# ~rhs
                         mi?# (match-instance? rhs#)]
-                    (if (and mi?# (not (:match? rhs#)))
+                    (if (or (and mi?# (not (:match? rhs#)))
+                          (satisfies? t/IContext rhs#))
                       [false nil]
                       (let [~lhs (if mi?# (:value rhs#) rhs#)]
                         ~@restof-expansion)))

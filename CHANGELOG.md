@@ -7,7 +7,11 @@
 
 ## [WIP] 0.3.1 / 2017-December-??
 
-- Fix issue where `mlet` does not consider a context value to be a non-match
+- Fix issue where matching macros do not consider a context value to be a non-match
+  - `mlet`
+  - `if-mlet`
+  - `when-mlet`
+  - `cond-mlet`
 
 
 ## 0.3.0 / 2017-November-23
