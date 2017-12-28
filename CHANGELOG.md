@@ -3,6 +3,16 @@
 ## Todo
 
 - [Todo] Adaptation of state monad
+- [Todo] Support for extensible, pattern-matching bind on constrained context
+  - Enumeration (pattern match on individual values)
+  - Range (pattern match on range groups)
+- [Todo] Utility abstractions (as value or context)
+  - Enum
+
+
+## [WIP] 0.3.2 / 2017-December-??
+
+- [TODO] Fix issue where a context cannot be printed due to clash of types: `IPersistentMap` and `IDeref`
 
 
 ## 0.3.1 / 2017-December-01
