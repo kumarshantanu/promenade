@@ -12,7 +12,7 @@
 
 ## [WIP] 0.3.2 / 2017-December-??
 
-- [TODO] Fix issue where a context cannot be printed due to clash of types: `IPersistentMap` and `IDeref`
+- Fix issue where a context cannot be printed due to clash of types: `IPersistentMap` and `IDeref`
 
 
 ## 0.3.1 / 2017-December-01

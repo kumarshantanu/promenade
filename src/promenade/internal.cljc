@@ -11,7 +11,7 @@
   (:require
     [promenade.type :as t])
   #?(:clj (:import
-            [clojure.lang IDeref IRecord])))
+            [clojure.lang IDeref IPersistentMap IRecord])))
 
 
 (defn expected
@@ -97,6 +97,9 @@
 
 
 #?(:clj (prefer-method print-method IRecord IDeref))
+
+
+#?(:clj (prefer-method print-method IPersistentMap IDeref))
 
 
 ;; ----- context matching support -----
