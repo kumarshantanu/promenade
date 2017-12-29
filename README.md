@@ -37,7 +37,7 @@ You may find similarities to this library in the following work:
 
 ## Usage
 
-Clojars coordinates: `[promenade "0.3.1"]`
+Clojars coordinates: `[promenade "0.3.2"]`
 
 See [Documentation](doc/intro.md)
 

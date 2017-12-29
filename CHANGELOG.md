@@ -10,7 +10,7 @@
   - Enum
 
 
-## [WIP] 0.3.2 / 2017-December-??
+## 0.3.2 / 2017-December-29
 
 - Fix issue where a context cannot be printed due to clash of types: `IPersistentMap` and `IDeref`
 
