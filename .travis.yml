@@ -1,0 +1,15 @@
+before_install:
+  - curl -sSL https://raw.githubusercontent.com/cljs-oss/canary/master/scripts/install-canary.sh | bash
+language: clojure
+jdk:
+  - openjdk7
+  - oraclejdk7
+  - oraclejdk8
+node_js:
+  - "iojs"
+  - "8"
+script:
+  - lein with-profile c17 test
+  - lein with-profile c18 test
+  - lein with-profile c19 test
+  - lein with-profile cljs doo node once
