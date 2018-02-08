@@ -293,6 +293,21 @@
     "1-element vector applies to the left ('exception' in this case)"))
 
 
+(deftest test-mdo
+  (testing "Match success"
+    (is (nil? (prom/mdo nil)))
+    (is (= 10 (prom/mdo 10)))
+    (is (= 20 (prom/mdo 10 20))))
+  (testing "Match implicit failure"
+    (is (= prom/nothing (prom/mdo)))
+    (is (= :foo (prom/deref-context (prom/mdo (prom/fail :foo) (prom/fail :bar) 20))))
+    (is (= 20 (prom/mdo (prom/mfailure (prom/fail :foo)) 20)))
+    (is (= prom/nothing (prom/mdo 10 (prom/mfailure (prom/fail :foo))))))
+  (testing "Match explicit failure"
+    (is (= 10 (prom/mdo (prom/mfailure 10))))
+    (is (= 10 (prom/mdo (prom/mfailure 10) (prom/mfailure 20))))))
+
+
 (deftest test-mlet
   (testing "Match success"
     (is (= 10 (prom/mlet [] 10)))

@@ -401,6 +401,28 @@
     (i/->Match false x)))
 
 
+(defmacro mdo
+  "Evaluate body of code such that any context is returned as soon as it is encountered unexpectedly. However, context
+  matches are ignored."
+  [& body]
+  (if (empty? body)
+    `nothing
+    (let [[expr & more] body]
+      (with-meta
+        `(let [val# ~expr
+               mi?# (i/match-instance? val#)]
+           (if (and mi?# (not (:match? val#)))
+             (:value val#)
+             (if (context? val#)
+               val#
+               (if ~(empty? more)
+                 (if (and mi?# (:match? val#))
+                   nothing
+                   val#)
+                 (mdo ~@more)))))
+        (meta expr)))))
+
+
 (defmacro mlet
   "Bind symbols in the binding forms to their respective matching context and evaluate body of code in the lexical
   scope. If a non-matching context is encountered, return it without proceeding any further.
