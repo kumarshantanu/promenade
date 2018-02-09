@@ -300,7 +300,7 @@
     (is (= 20 (prom/mdo 10 20))))
   (testing "Match implicit failure"
     (is (= prom/nothing (prom/mdo)))
-    (is (= :foo (prom/deref-context (prom/mdo (prom/fail :foo) (prom/fail :bar) 20))) "context bails out early")
+    (is (= (prom/fail :foo) (prom/mdo (prom/fail :foo) (prom/fail :bar) 20)) "context bails out early")
     (is (= 20 (prom/mdo (prom/mfailure (prom/fail :foo)) 20)) "matching context makes no difference")))
 
 
