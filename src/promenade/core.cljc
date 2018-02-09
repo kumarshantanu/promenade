@@ -438,11 +438,13 @@
   (when (odd? (count bindings))
     (i/expected "even number of binding forms" bindings))
   (if (empty? bindings)
-    `(do ~@body)
+    (with-meta `(mdo ~@body)
+      (meta body))
     (let [[lhs rhs & more] bindings
-          restof-expansion (if (seq more)
-                             [`(mlet [~@more] ~@body)]
-                             body)]
+          restof-expansion (with-meta (if (seq more)
+                                        `(mlet [~@more] (mdo ~@body))
+                                        `(mdo ~@body))
+                             (meta body))]
       (with-meta `(let [rhs# ~rhs
                         mi?# (i/match-instance? rhs#)]
                     (if (and mi?# (not (:match? rhs#)))
@@ -450,7 +452,7 @@
                       (if (context? rhs#)
                         rhs#
                         (let [~lhs (if mi?# (:value rhs#) rhs#)]
-                          ~@restof-expansion))))
+                          ~restof-expansion))))
         (or (meta rhs) (meta lhs))))))
 
 

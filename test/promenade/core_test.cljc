@@ -318,6 +318,11 @@
     (is (= [:foo :bar] (prom/mlet [a (prom/mfailure (prom/fail :foo))] [a :bar])))
     (is (= [:foo :bar] (prom/mlet [a (prom/mfailure (prom/fail :foo))
                                    b (prom/mnothing prom/nothing :bar)] [a b]))))
+  (testing "Body"
+    (is (= prom/nothing (prom/mlet [])))
+    (is (= 20 (prom/mlet [] 10 20)))
+    (is (= (prom/fail 10) (prom/mlet [] (prom/fail 10) 20)))
+    (is (= 10 (prom/mlet [] (prom/mnothing 10 :foo)))))
   (testing "Match implicit failure"
     (is (= (prom/fail 10) (prom/mlet [a (prom/fail 10)] :foo)))
     (is (= prom/nothing (prom/mlet [a prom/nothing] :foo)))

@@ -14,7 +14,7 @@
 
 - Add `mdo` as an equivalent of `do` form
 - Retrofit other forms using `mdo`
-  - [TODO] `mlet`
+  - `mlet`
   - [TODO] `when-mlet`
 
 
