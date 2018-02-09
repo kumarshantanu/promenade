@@ -382,6 +382,9 @@
     (is (= 50 (prom/when-mlet [a (prom/mfailure (prom/fail 10))
                                b 20
                                c (prom/mnothing prom/nothing 30)] (+ a b c) 50))))
+  (testing "Failure in body"
+    (is (= prom/nothing (prom/when-mlet [])))
+    (is (= (prom/fail 10) (prom/when-mlet [a 10] (prom/fail a) a))))
   (testing "Match implicit failure"
     (is (= prom/nothing (prom/when-mlet [a (prom/fail 10)] :foo)))
     (is (= prom/nothing (prom/when-mlet [a prom/nothing] :foo)))

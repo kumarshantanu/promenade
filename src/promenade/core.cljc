@@ -494,7 +494,7 @@
     cond-mlet"
   [bindings & body]
   `(if-mlet ~bindings
-     (do ~@body)
+     (mdo ~@body)
      nothing))
 
 

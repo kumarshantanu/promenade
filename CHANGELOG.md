@@ -15,7 +15,7 @@
 - Add `mdo` as an equivalent of `do` form
 - Retrofit other forms using `mdo`
   - `mlet`
-  - [TODO] `when-mlet`
+  - `when-mlet`
 - Add arity to specify 'default'
   - `mfailure`
   - `mthrown`
