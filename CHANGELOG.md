@@ -10,7 +10,7 @@
   - Enum
 
 
-## [WIP] 0.3.3 / 2018-February-??
+## [WIP] 0.4.0 / 2018-February-??
 
 - Add `mdo` as an equivalent of `do` form
 - Retrofit other forms using `mdo`
