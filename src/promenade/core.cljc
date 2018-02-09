@@ -417,17 +417,12 @@
     `nothing
     (let [[expr & more] body]
       (with-meta
-        `(let [val# ~expr
-               mi?# (i/match-instance? val#)]
-           (if (and mi?# (not (:match? val#)))
-             (:value val#)
-             (if (context? val#)
+        `(let [val# ~expr]
+           (if (context? val#)
+             val#
+             (if ~(empty? more)
                val#
-               (if ~(empty? more)
-                 (if (and mi?# (:match? val#))
-                   nothing
-                   val#)
-                 (mdo ~@more)))))
+               (mdo ~@more))))
         (meta expr)))))
 
 

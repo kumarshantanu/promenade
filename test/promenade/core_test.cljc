@@ -300,12 +300,8 @@
     (is (= 20 (prom/mdo 10 20))))
   (testing "Match implicit failure"
     (is (= prom/nothing (prom/mdo)))
-    (is (= :foo (prom/deref-context (prom/mdo (prom/fail :foo) (prom/fail :bar) 20))))
-    (is (= 20 (prom/mdo (prom/mfailure (prom/fail :foo)) 20)))
-    (is (= prom/nothing (prom/mdo 10 (prom/mfailure (prom/fail :foo))))))
-  (testing "Match explicit failure"
-    (is (= 10 (prom/mdo (prom/mfailure 10))))
-    (is (= 10 (prom/mdo (prom/mfailure 10) (prom/mfailure 20))))))
+    (is (= :foo (prom/deref-context (prom/mdo (prom/fail :foo) (prom/fail :bar) 20))) "context bails out early")
+    (is (= 20 (prom/mdo (prom/mfailure (prom/fail :foo)) 20)) "matching context makes no difference")))
 
 
 (deftest test-mlet
@@ -321,8 +317,7 @@
   (testing "Body"
     (is (= prom/nothing (prom/mlet [])))
     (is (= 20 (prom/mlet [] 10 20)))
-    (is (= (prom/fail 10) (prom/mlet [] (prom/fail 10) 20)))
-    (is (= 10 (prom/mlet [] (prom/mnothing 10 :foo)))))
+    (is (= (prom/fail 10) (prom/mlet [] (prom/fail 10) 20))))
   (testing "Match implicit failure"
     (is (= (prom/fail 10) (prom/mlet [a (prom/fail 10)] :foo)))
     (is (= prom/nothing (prom/mlet [a prom/nothing] :foo)))
