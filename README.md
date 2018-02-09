@@ -39,7 +39,7 @@ You may find similarities to this library in the following work:
 
 ## Usage
 
-Clojars coordinates: `[promenade "0.3.2"]`
+Clojars coordinates: `[promenade "0.4.0"]`
 
 See [Documentation](doc/intro.md)
 
@@ -55,7 +55,7 @@ $ lein do clean, cljs-test  # run tests in ClojureScript using NodeJS
 
 ## License
 
-Copyright © 2017 Shantanu Kumar (kumar.shantanu@gmail.com, shantanu.kumar@concur.com)
+Copyright © 2017-2018 Shantanu Kumar (kumar.shantanu@gmail.com, shantanu.kumar@concur.com)
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.

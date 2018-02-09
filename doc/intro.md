@@ -169,12 +169,17 @@ need to access the previous step's result and also one from three steps earlier?
 an error was handled and recovered from in one of the previous steps? In such cases we can get to a lower level by
 using one of the following match-bind macros.
 
+### `mdo`
+
+The `mdo` is similar to `clojure.core/do`, except that it returns the first encountered context value if any. An empty
+body of code yields `promenade.core/nothing`.
+
 ### `mlet`
 
 The `mlet` macro is a lot like `clojure.core/let`, with the difference that it always binds to a matching result.
 Whenever a non-matching result is found, `mlet` immediately returns it without proceeding any further. The following
 snippet demonstrates the implicit matcher, which only proceeds on successful result - it aborts if at any point
-there's a non-success result.
+there's a non-success result. An empty body of code yields `promenade.core/nothing`.
 
 ```clojure
 (prom/mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts mlet
@@ -216,6 +221,8 @@ returns `nothing` on non-match:
   (println "Fulfilling order:" order-id)
   (fulfil-order f-ord))
 ```
+
+In `when-mlet`, an empty body of code yields `promenade.core/nothing`.
 
 ### `cond-mlet`
 

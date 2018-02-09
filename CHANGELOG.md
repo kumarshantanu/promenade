@@ -10,9 +10,10 @@
   - Enum
 
 
-## [WIP] 0.4.0 / 2018-February-??
+## 0.4.0 / 2018-February-09
 
 - Add `mdo` as an equivalent of `do` form
+  - Context values are returned as soon as encountered
 - Retrofit other forms using `mdo`
   - `mlet`
   - `when-mlet`
