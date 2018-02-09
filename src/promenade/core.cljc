@@ -365,10 +365,14 @@
     if-mlet
     when-mlet
     cond-mlet"
-  [x]
-  (if (failure? x)
-    (i/->Match true (deref x))
-    (i/->Match false x)))
+  ([x]
+    (if (failure? x)
+      (i/->Match true (deref x))
+      (i/->Match false x)))
+  ([x default]
+    (if (failure? x)
+      (i/->Match true default)
+      (i/->Match false x))))
 
 
 (defn mnothing
@@ -395,10 +399,14 @@
     if-mlet
     when-mlet
     cond-mlet"
-  [x]
-  (if (thrown? x)
-    (i/->Match true (deref x))
-    (i/->Match false x)))
+  ([x]
+    (if (thrown? x)
+      (i/->Match true (deref x))
+      (i/->Match false x)))
+  ([x default]
+    (if (thrown? x)
+      (i/->Match true default)
+      (i/->Match false x))))
 
 
 (defmacro mdo

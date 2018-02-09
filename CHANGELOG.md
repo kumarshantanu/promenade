@@ -16,6 +16,9 @@
 - Retrofit other forms using `mdo`
   - `mlet`
   - [TODO] `when-mlet`
+- Add arity to specify 'default'
+  - `mfailure`
+  - `mthrown`
 
 
 ## 0.3.2 / 2017-December-29
