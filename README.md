@@ -37,7 +37,7 @@ You may find similarities to this library in the following work:
 - [Either-monad adaptation](https://youtu.be/3y7xzH8jB8A?t=1390)
 - [Various](https://github.com/funcool/cats) [Clojure](https://github.com/clojure/algo.monads) [monad](http://fluokitten.uncomplicate.org/) [implementations](https://github.com/blancas/morph)
 
-## External references
+### External references
 
 - IN/Clojure 2018 talk: [Elegant error-handling for a more civilized age](https://www.youtube.com/watch?v=FsyPQG_IuaY) and [Slides](https://speakerdeck.com/varunited/elegant-error-handling-for-a-more-civilized-age) by Varun Sharma
 - Blog post: [Using Clojure macros for nicer error handling](https://jakemccrary.com/blog/2018/02/18/using-clojure-macros-for-nicer-error-handling/) by Jake McCrary
