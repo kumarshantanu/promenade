@@ -17,7 +17,10 @@
   - Branching: `branch`
 - [Todo] Do not implicitly return `nothing` (or any context, unless the user asks for it)
   - `when-mlet` (test fail)
-  - `mlet` (empty body)
+  - `mdo` (empty body)
+    - `mlet` (empty body)
+- Doc: Improve section `Dealing with success and failure with Either`
+  - https://github.com/kumarshantanu/promenade/issues/3
 - [Todo] CLJS: Test using lowest (1.9.xx) and highest (1.10.126) versions
 
 

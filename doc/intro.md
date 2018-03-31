@@ -65,6 +65,11 @@ returns a failure. Once the `(cancel-order order-id failure)` step returns failu
 called with that failure argument to take corrective action and return a failure again. If `check-inventory`
 was successful then `process-order` is called, followed by `fulfil-order` on success.
 
+A failure-handler may or may not recover from a _failure_, hence they may return either _failure_ or _success_.
+However, a failure-handler is only invoked if the prior result is a _failure_. Specifically, in the above example,
+`cancel-order` would deliberately keep the status as _failure_ so that the control can flow to the next step
+`stock-replenish-init`.
+
 #### The either-bind variants
 
 The success and failure results are basically dealt with using the `prom/bind-either` function:
