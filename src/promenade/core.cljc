@@ -26,6 +26,7 @@
 (defn nothing? [x] "Return true if argument is a Nothing, false otherwise." (satisfies? t/INothing x))
 (defn thrown?  [x] "Return true if argument is a Thrown, false otherwise."  (satisfies? t/IThrown x))
 (defn context? [x] "Return true if argument is a Context, false otherwise." (satisfies? t/IContext x))
+(def not-context?  "Return false if argument is a Context, true otherwise." (complement context?))
 
 
 ;;~~~~~~~~~~~~~~~~~~~
@@ -118,6 +119,21 @@
 
 
 ;; ----- Bind -----
+
+
+(defn branch
+  "Given an optional fallback fn (fn [x]) (default: clojure.core/identity), compose it with branch execution as per
+  predicate. You may use this to compose a branching pipeline:
+  (-> identity
+    (branch pred f)
+    (branch pred2 f2))"
+  ([pred f]
+    (branch identity pred f))
+  ([fallback pred f]
+    (fn [x]
+      (if (pred x)
+        (f x)
+        (fallback x)))))
 
 
 (defn bind-either

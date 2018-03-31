@@ -13,13 +13,8 @@
 ## [WIP] 0.5.0 / 2018-March-??
 
 - Utility functions
-  - [Todo] Bubble up: propagate contextual values to the caller
-    - [Todo] `context->reduced`
-  - [Todo] Insulator: avoid processing context like context-free
-    - [Todo] `free`
-    - [Todo] `either`
-    - [Todo] `maybe`
-    - [Todo] `trail`
+  - Predicate: `not-context?`
+  - Branching: `branch`
 - [Todo] Do not implicitly return `nothing` (or any context, unless the user asks for it)
   - `when-mlet` (test fail)
   - `mlet` (empty body)

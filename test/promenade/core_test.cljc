@@ -26,7 +26,8 @@
     (is ((every-pred prom/nothing? prom/context?) prom/nothing))
     (is ((every-pred prom/nothing? prom/context?) (prom/void :foo)))
     (is ((every-pred prom/thrown?  prom/context?) (prom/thrown (throwable "test"))))
-    (is ((every-pred prom/thrown?  prom/context?) (prom/! (throw (throwable "test"))))))
+    (is ((every-pred prom/thrown?  prom/context?) (prom/! (throw (throwable "test")))))
+    (is (prom/not-context? :foo)))
   (testing "Negative tests"
     (is (not (prom/failure? prom/nothing)))
     (is (not (prom/failure? :foo)))
@@ -34,7 +35,15 @@
     (is (not (prom/nothing? :foo)))
     (is (not (prom/thrown?  (prom/void :foo))))
     (is (not (prom/thrown?  :foo)))
-    (is (not (prom/context? :foo)))))
+    (is (not (prom/context? :foo)))
+    (is (not (prom/not-context? (prom/fail :fail))))))
+
+
+(deftest test-branch
+  (is (= 101 ((prom/branch even? inc) 100)))
+  (is (= 101 ((prom/branch even? inc) 101)))
+  (is (= 101 ((prom/branch dec even? inc) 100)))
+  (is (= 100 ((prom/branch dec even? inc) 101))))
 
 
 (deftest test-bind-either

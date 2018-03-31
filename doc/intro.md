@@ -161,6 +161,32 @@ For example, the code snippet below enhances upon the use-case we saw in success
   (prom/trial->   [generate-error]))
 ```
 
+
+## Low level control during sequence operations
+
+Often we may need to branch our decisions based on whether items in a sequence are failure/nothing/thrown/context or
+ordinary values. The `branch` function is helpful in such cases. Consider the snippet below where we avoid processing
+items that are not ordinary values:
+
+```clojure
+(def process-valid-item (prom/branch prom/not-context? process-item))
+
+(map process-valid-item found-items)  ; process each item that is not a context
+```
+
+Another use-case may be where we have to abort processing a sequence based on occurence of even a single error. The
+following snippet shows such a use-case:
+
+```clojure
+(def context->reduced (prom/branch prom/context? reduced))
+
+(reduce (fn [a x] (context->reduced (prom/either->> x
+                                      process-valid-item
+                                      (conj a))))
+  [] found-items)
+```
+
+
 ## Granular flexibility with matchers
 
 The pipeline-threading macros we saw in the sections above are great for readability and linear use-cases. However,
