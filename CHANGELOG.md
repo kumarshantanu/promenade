@@ -21,7 +21,7 @@
   - `when-mlet` (test fail, empty body)
 - Doc: Improve section `Dealing with success and failure with Either`
   - https://github.com/kumarshantanu/promenade/issues/3
-- [Todo] CLJS: Test using lowest (1.9.xx) and highest (1.10.126) versions
+- Test with muliple CLJS versions
 
 
 ## 0.4.0 / 2018-February-09
