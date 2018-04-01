@@ -12,4 +12,5 @@ pom.xml.asc
 /.classpath
 /.project
 /.settings
+/node_modules
 
