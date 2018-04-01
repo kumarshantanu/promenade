@@ -427,10 +427,10 @@
 
 (defmacro mdo
   "Evaluate body of code such that any context is returned as soon as it is encountered unexpectedly. However, context
-  matches are ignored."
+  matches are ignored. Return nil for empty body."
   [& body]
   (if (empty? body)
-    `nothing
+    `nil
     (let [[expr & more] body]
       (with-meta
         `(let [val# ~expr]
@@ -500,7 +500,7 @@
 
 (defmacro when-mlet
   "Bind symbols in the binding forms to their respective matching context and evaluate th body of code in the lexical
-  scope. If a non-matching context is encountered, return a promenade.type.INothing instance.
+  scope. If a non-matching context is encountered, return nil.
   See:
     mfailure
     mnothing
@@ -511,7 +511,7 @@
   [bindings & body]
   `(if-mlet ~bindings
      (mdo ~@body)
-     nothing))
+     nil))
 
 
 (defmacro cond-mlet

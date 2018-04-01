@@ -203,14 +203,14 @@ using one of the following match-bind macros.
 ### `mdo`
 
 The `mdo` is similar to `clojure.core/do`, except that it returns the first encountered context value if any. An empty
-body of code yields `promenade.core/nothing`.
+body of code yields `nil`.
 
 ### `mlet`
 
 The `mlet` macro is a lot like `clojure.core/let`, with the difference that it always binds to a matching result.
 Whenever a non-matching result is found, `mlet` immediately returns it without proceeding any further. The following
 snippet demonstrates the implicit matcher, which only proceeds on successful result - it aborts if at any point
-there's a non-success result. An empty body of code yields `promenade.core/nothing`.
+there's a non-success result. An empty body of code yields `nil`.
 
 ```clojure
 (prom/mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts mlet
@@ -243,7 +243,7 @@ This is achieved using `if-mlet`, which is illustrated using the snippet below:
 ```
 
 Here we return a failure in the _else_ part of `if-mlet`. Now, if we see a similar snippet using `when-mlet` it
-returns `nothing` on non-match:
+returns `nil` on non-match:
 
 ```clojure
 (prom/when-mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts
@@ -253,7 +253,7 @@ returns `nothing` on non-match:
   (fulfil-order f-ord))
 ```
 
-In `when-mlet`, an empty body of code yields `promenade.core/nothing`.
+In `when-mlet`, an empty body of code yields `nil`.
 
 ### `cond-mlet`
 

@@ -15,10 +15,10 @@
 - Utility functions
   - Predicate: `not-context?`
   - Branching: `branch`
-- [Todo] Do not implicitly return `nothing` (or any context, unless the user asks for it)
-  - `when-mlet` (test fail)
+- [BREAKING CHANGE] Do not implicitly return `nothing` (or any context, unless the user asks for it)
   - `mdo` (empty body)
-    - `mlet` (empty body)
+  - `mlet` (empty body)
+  - `when-mlet` (test fail, empty body)
 - Doc: Improve section `Dealing with success and failure with Either`
   - https://github.com/kumarshantanu/promenade/issues/3
 - [Todo] CLJS: Test using lowest (1.9.xx) and highest (1.10.126) versions
