@@ -174,9 +174,9 @@ ordinary values. The `branch` function is helpful in such cases. Consider the sn
 items that are not ordinary values:
 
 ```clojure
-(def process-valid-item (prom/branch prom/not-context? process-item))
+(def process-valid-item (prom/branch prom/free? process-item))
 
-(map process-valid-item found-items)  ; process each item that is not a context
+(map process-valid-item found-items)  ; process each item that is context-free (not a context)
 ```
 
 Another use-case may be where we have to abort processing a sequence based on occurence of even a single error. The

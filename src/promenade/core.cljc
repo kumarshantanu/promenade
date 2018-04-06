@@ -26,7 +26,7 @@
 (defn nothing? [x] "Return true if argument is a Nothing, false otherwise." (satisfies? t/INothing x))
 (defn thrown?  [x] "Return true if argument is a Thrown, false otherwise."  (satisfies? t/IThrown x))
 (defn context? [x] "Return true if argument is a Context, false otherwise." (satisfies? t/IContext x))
-(def not-context?  "Return false if argument is a Context, true otherwise." (complement context?))
+(defn free?    [x] "Return true if argument is Context-free (not a Context), false otherwise." (not (context? x)))
 
 
 ;;~~~~~~~~~~~~~~~~~~~

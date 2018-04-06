@@ -27,7 +27,7 @@
     (is ((every-pred prom/nothing? prom/context?) (prom/void :foo)))
     (is ((every-pred prom/thrown?  prom/context?) (prom/thrown (throwable "test"))))
     (is ((every-pred prom/thrown?  prom/context?) (prom/! (throw (throwable "test")))))
-    (is (prom/not-context? :foo)))
+    (is (prom/free? :foo)))
   (testing "Negative tests"
     (is (not (prom/failure? prom/nothing)))
     (is (not (prom/failure? :foo)))
@@ -36,7 +36,7 @@
     (is (not (prom/thrown?  (prom/void :foo))))
     (is (not (prom/thrown?  :foo)))
     (is (not (prom/context? :foo)))
-    (is (not (prom/not-context? (prom/fail :fail))))))
+    (is (not (prom/free? (prom/fail :fail))))))
 
 
 (deftest test-branch

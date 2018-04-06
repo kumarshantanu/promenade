@@ -13,7 +13,7 @@
 ## [WIP] 0.5.0 / 2018-March-??
 
 - Utility functions
-  - Predicate: `not-context?`
+  - Predicate: `free?` (to imply "context free" or "not context")
   - Branching: `branch`
 - [BREAKING CHANGE] Do not implicitly return `nothing` (or any context, unless the user asks for it)
   - `mdo` (empty body)
