@@ -10,6 +10,20 @@
   - Enum
 
 
+## [WIP] 0.5.0 / 2018-March-??
+
+- Utility functions
+  - Predicate: `free?` (to imply "context free" or "not context")
+  - Branching: `branch`
+- [BREAKING CHANGE] Do not implicitly return `nothing` (or any context, unless the user asks for it)
+  - `mdo` (empty body)
+  - `mlet` (empty body)
+  - `when-mlet` (test fail, empty body)
+- Doc: Improve section `Dealing with success and failure with Either`
+  - https://github.com/kumarshantanu/promenade/issues/3
+- Test with muliple CLJS versions
+
+
 ## 0.4.0 / 2018-February-09
 
 - Add `mdo` as an equivalent of `do` form

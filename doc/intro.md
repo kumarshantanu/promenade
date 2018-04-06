@@ -65,6 +65,11 @@ returns a failure. Once the `(cancel-order order-id failure)` step returns failu
 called with that failure argument to take corrective action and return a failure again. If `check-inventory`
 was successful then `process-order` is called, followed by `fulfil-order` on success.
 
+A failure-handler may or may not recover from a _failure_, hence they may return either _failure_ or _success_.
+However, a failure-handler is only invoked if the prior result is a _failure_. Specifically, in the above example,
+`cancel-order` would deliberately keep the status as _failure_ so that the control can flow to the next step
+`stock-replenish-init`.
+
 #### The either-bind variants
 
 The success and failure results are basically dealt with using the `prom/bind-either` function:
@@ -161,6 +166,32 @@ For example, the code snippet below enhances upon the use-case we saw in success
   (prom/trial->   [generate-error]))
 ```
 
+
+## Low level control during sequence operations
+
+Often we may need to branch our decisions based on whether items in a sequence are failure/nothing/thrown/context or
+ordinary values. The `branch` function is helpful in such cases. Consider the snippet below where we avoid processing
+items that are not ordinary values:
+
+```clojure
+(def process-valid-item (prom/branch prom/free? process-item))
+
+(map process-valid-item found-items)  ; process each item that is context-free (not a context)
+```
+
+Another use-case may be where we have to abort processing a sequence based on occurence of even a single error. The
+following snippet shows such a use-case:
+
+```clojure
+(def context->reduced (prom/branch prom/context? reduced))
+
+(reduce (fn [a x] (context->reduced (prom/either->> x
+                                      process-valid-item
+                                      (conj a))))
+  [] found-items)
+```
+
+
 ## Granular flexibility with matchers
 
 The pipeline-threading macros we saw in the sections above are great for readability and linear use-cases. However,
@@ -172,14 +203,14 @@ using one of the following match-bind macros.
 ### `mdo`
 
 The `mdo` is similar to `clojure.core/do`, except that it returns the first encountered context value if any. An empty
-body of code yields `promenade.core/nothing`.
+body of code yields `nil`.
 
 ### `mlet`
 
 The `mlet` macro is a lot like `clojure.core/let`, with the difference that it always binds to a matching result.
 Whenever a non-matching result is found, `mlet` immediately returns it without proceeding any further. The following
 snippet demonstrates the implicit matcher, which only proceeds on successful result - it aborts if at any point
-there's a non-success result. An empty body of code yields `promenade.core/nothing`.
+there's a non-success result. An empty body of code yields `nil`.
 
 ```clojure
 (prom/mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts mlet
@@ -212,7 +243,7 @@ This is achieved using `if-mlet`, which is illustrated using the snippet below:
 ```
 
 Here we return a failure in the _else_ part of `if-mlet`. Now, if we see a similar snippet using `when-mlet` it
-returns `nothing` on non-match:
+returns `nil` on non-match:
 
 ```clojure
 (prom/when-mlet [order (find-order-details order-id)    ; `order` binds to value if returned, `nothing` aborts
@@ -222,7 +253,7 @@ returns `nothing` on non-match:
   (fulfil-order f-ord))
 ```
 
-In `when-mlet`, an empty body of code yields `promenade.core/nothing`.
+In `when-mlet`, an empty body of code yields `nil`.
 
 ### `cond-mlet`
 

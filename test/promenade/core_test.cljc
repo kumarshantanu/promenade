@@ -26,7 +26,8 @@
     (is ((every-pred prom/nothing? prom/context?) prom/nothing))
     (is ((every-pred prom/nothing? prom/context?) (prom/void :foo)))
     (is ((every-pred prom/thrown?  prom/context?) (prom/thrown (throwable "test"))))
-    (is ((every-pred prom/thrown?  prom/context?) (prom/! (throw (throwable "test"))))))
+    (is ((every-pred prom/thrown?  prom/context?) (prom/! (throw (throwable "test")))))
+    (is (prom/free? :foo)))
   (testing "Negative tests"
     (is (not (prom/failure? prom/nothing)))
     (is (not (prom/failure? :foo)))
@@ -34,7 +35,15 @@
     (is (not (prom/nothing? :foo)))
     (is (not (prom/thrown?  (prom/void :foo))))
     (is (not (prom/thrown?  :foo)))
-    (is (not (prom/context? :foo)))))
+    (is (not (prom/context? :foo)))
+    (is (not (prom/free? (prom/fail :fail))))))
+
+
+(deftest test-branch
+  (is (= 101 ((prom/branch even? inc) 100)))
+  (is (= 101 ((prom/branch even? inc) 101)))
+  (is (= 101 ((prom/branch dec even? inc) 100)))
+  (is (= 100 ((prom/branch dec even? inc) 101))))
 
 
 (deftest test-bind-either
@@ -299,7 +308,7 @@
     (is (= 10 (prom/mdo 10)))
     (is (= 20 (prom/mdo 10 20))))
   (testing "Match implicit failure"
-    (is (= prom/nothing (prom/mdo)))
+    (is (= nil (prom/mdo)))
     (is (= (prom/fail :foo) (prom/mdo (prom/fail :foo) (prom/fail :bar) 20)) "context bails out early")
     (is (= 20 (prom/mdo (prom/mfailure (prom/fail :foo)) 20)) "matching context makes no difference")))
 
@@ -315,7 +324,7 @@
     (is (= [:foo :bar] (prom/mlet [a (prom/mfailure (prom/fail :foo))
                                    b (prom/mnothing prom/nothing :bar)] [a b]))))
   (testing "Body"
-    (is (= prom/nothing (prom/mlet [])))
+    (is (= nil (prom/mlet [])))
     (is (= 20 (prom/mlet [] 10 20)))
     (is (= (prom/fail 10) (prom/mlet [] (prom/fail 10) 20))))
   (testing "Match implicit failure"
@@ -383,19 +392,19 @@
                                b 20
                                c (prom/mnothing prom/nothing 30)] (+ a b c) 50))))
   (testing "Failure in body"
-    (is (= prom/nothing (prom/when-mlet [])))
+    (is (= nil (prom/when-mlet [])))
     (is (= (prom/fail 10) (prom/when-mlet [a 10] (prom/fail a) a))))
   (testing "Match implicit failure"
-    (is (= prom/nothing (prom/when-mlet [a (prom/fail 10)] :foo)))
-    (is (= prom/nothing (prom/when-mlet [a prom/nothing] :foo)))
-    (is (= prom/nothing (prom/when-mlet [a (prom/thrown 10)] :foo))))
+    (is (= nil (prom/when-mlet [a (prom/fail 10)] :foo)))
+    (is (= nil (prom/when-mlet [a prom/nothing] :foo)))
+    (is (= nil (prom/when-mlet [a (prom/thrown 10)] :foo))))
   (testing "Match failure"
-    (is (= prom/nothing (prom/when-mlet [a (prom/mfailure 10)] a)))
-    (is (= prom/nothing (prom/when-mlet [a 10
-                                         b (prom/mfailure 20)] (+ a b))))
-    (is (= prom/nothing (prom/when-mlet [a 10
-                                         b 20
-                                         c (prom/mfailure 30)] (+ a b c))))))
+    (is (= nil (prom/when-mlet [a (prom/mfailure 10)] a)))
+    (is (= nil (prom/when-mlet [a 10
+                                b (prom/mfailure 20)] (+ a b))))
+    (is (= nil (prom/when-mlet [a 10
+                                b 20
+                                c (prom/mfailure 30)] (+ a b c))))))
 
 
 (deftest test-cond-mlet
