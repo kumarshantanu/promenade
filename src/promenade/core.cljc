@@ -130,10 +130,10 @@
   ([pred f]
     (branch identity pred f))
   ([fallback pred f]
-    (fn [x]
-      (if (pred x)
-        (f x)
-        (fallback x)))))
+    (fn [mval]
+      (if (pred mval)
+        (f mval)
+        (fallback mval)))))
 
 
 (defn bind-either
