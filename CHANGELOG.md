@@ -10,7 +10,7 @@
   - Enum
 
 
-## [WIP] 0.5.0 / 2018-March-??
+## 0.5.0 / 2018-April-06
 
 - Utility functions
   - Predicate: `free?` (to imply "context free" or "not context")
