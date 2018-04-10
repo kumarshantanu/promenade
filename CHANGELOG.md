@@ -13,9 +13,10 @@
 ## [WIP] 0.5.1 / 2018-April-??
 
 - Factor out `doo` related namespaces into a separate directory
-- [Todo] Make `Failure`, `Nothing` and `Thrown` instances printable at CLJ and CLJS REPL
-  - [Todo] Default `print-method`
-  - [Todo] clojure.pprint `simple-dispatch` - https://gist.github.com/rwilson/34c88a97c6260a7dc703
+- Make `Failure`, `Nothing` and `Thrown` instances printable at the REPL
+  - Default printing: Multi method `print-method`
+    - https://github.com/kumarshantanu/promenade/issues/5
+  - Pretty printing using `clojure.pprint/pprint`: Multi method `simple-dispatch`
 
 
 ## 0.5.0 / 2018-April-06

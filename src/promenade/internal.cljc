@@ -9,9 +9,10 @@
 
 (ns promenade.internal
   (:require
+    #?(:clj [clojure.pprint :as pp])
     [promenade.type :as t])
   #?(:clj (:import
-            [clojure.lang IDeref IPersistentMap IRecord])))
+            [clojure.lang IDeref IRecord])))
 
 
 (defn expected
@@ -96,10 +97,15 @@
   t/IThrown)
 
 
-#?(:clj (prefer-method print-method IRecord IDeref))
+;; make Failure, Nothing and Thrown printable at the REPL
+#?(:clj (defmethod print-method Failure [x writer] ((get-method print-method IRecord) x writer)))
+#?(:clj (defmethod print-method Nothing [x writer] ((get-method print-method IRecord) x writer)))
+#?(:clj (defmethod print-method Thrown  [x writer] ((get-method print-method IRecord) x writer)))
 
-
-#?(:clj (prefer-method print-method IPersistentMap IDeref))
+;; make Failure, Nothing and Thrown pretty-printable at the REPL
+#?(:clj (defmethod pp/simple-dispatch Failure [x] ((get-method pp/simple-dispatch IRecord) x)))
+#?(:clj (defmethod pp/simple-dispatch Nothing [x] ((get-method pp/simple-dispatch IRecord) x)))
+#?(:clj (defmethod pp/simple-dispatch Thrown  [x] ((get-method pp/simple-dispatch IRecord) x)))
 
 
 ;; ----- context matching support -----
