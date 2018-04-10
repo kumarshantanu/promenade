@@ -10,7 +10,7 @@
   - Enum
 
 
-## [WIP] 0.5.1 / 2018-April-??
+## 0.5.1 / 2018-April-11
 
 - Factor out `doo` related namespaces into a separate directory
 - Make `Failure`, `Nothing` and `Thrown` instances printable at the REPL

@@ -44,7 +44,7 @@ You may find similarities to this library in the following work:
 
 ## Usage
 
-Clojars coordinates: `[promenade "0.5.0"]`
+Clojars coordinates: `[promenade "0.5.1"]`
 
 See [Documentation](doc/intro.md)
 
