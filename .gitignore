@@ -13,4 +13,5 @@ pom.xml.asc
 /.project
 /.settings
 /node_modules
+/.cljs_rhino_repl
 
