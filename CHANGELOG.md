@@ -12,7 +12,7 @@
 
 ## [WIP] 0.5.1 / 2018-April-??
 
-- [Todo] Factor out `doo` related namespaces into a separate directory under doo profile
+- Factor out `doo` related namespaces into a separate directory
 - [Todo] Make `Failure`, `Nothing` and `Thrown` instances printable at CLJ and CLJS REPL
   - [Todo] Default `print-method`
   - [Todo] clojure.pprint `simple-dispatch` - https://gist.github.com/rwilson/34c88a97c6260a7dc703

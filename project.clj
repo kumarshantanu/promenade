@@ -12,7 +12,7 @@
              :cljs {:plugins   [[lein-cljsbuild "1.1.7"]
                                 [lein-doo "0.1.10"]]
                     :doo       {:build "test"}
-                    :cljsbuild {:builds {:test {:source-paths ["src" "test"]
+                    :cljsbuild {:builds {:test {:source-paths ["src" "test" "test-doo"]
                                                 :compiler {:main          promenade.runner
                                                            :output-dir    "target/out"
                                                            :output-to     "target/test/core.js"
