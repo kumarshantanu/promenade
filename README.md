@@ -48,6 +48,11 @@ Clojars coordinates: `[promenade "0.5.1"]`
 
 See [Documentation](doc/intro.md)
 
+## Discuss
+
+Slack channel: [#promenade](https://clojurians.slack.com/messages/CAK3M4A65/) (you need an invitation from
+http://clojurians.net/ to join the Clojurian Slack team)
+
 ## Development
 
 Running tests:
