@@ -11,6 +11,7 @@
   "Success/Failure (known as Either) are the dual of each other with respect to an operation result. Similarly, other
   duals include Just/Nothing (known as Maybe) and Result/Exception (known as Trial) on related perspectives. This
   namespace provides unified, standalone and composable mechanism to represent and process such operation outcomes."
+  #?(:cljs (:require-macros promenade.core))
   (:require
     [promenade.internal :as i]
     [promenade.type     :as t]))
@@ -143,7 +144,7 @@
     either->>
     either-as->
     bind-maybe
-    bind-thrown"
+    bind-trial"
   ([mval success-f] (if (context? mval)
                       mval
                       (success-f mval)))
@@ -160,7 +161,7 @@
     maybe->>
     maybe-as->
     bind-either
-    bind-thrown"
+    bind-trial"
   ([mval just-f] (if (context? mval)
                    mval
                    (just-f mval)))
@@ -210,7 +211,7 @@
 
 
 (defmacro either->>
-  "Thread-last expansion using bind. A vector form of one element [x] is applied only to 'failure' leaving
+  "Thread-last expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
   'success' intact.
   Example usage                           Expanded as
   -------------                         | -----------
@@ -230,7 +231,7 @@
 
 
 (defmacro either-as->
-  "Thread-anywhere expansion using bind. A vector form of one element [x] is applied only to 'failure' leaving
+  "Thread-anywhere expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
   'success' intact.
   Example usage                             Expanded as
   -------------                           | -----------
@@ -270,7 +271,7 @@
 
 
 (defmacro maybe->>
-  "Thread-last expansion using bind. A vector form of one element [x] is applied only to 'nothing' leaving
+  "Thread-last expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
   'just' intact.
   Example usage                           Expanded as
   -------------                         | -----------
@@ -290,7 +291,7 @@
 
 
 (defmacro maybe-as->
-  "Thread-anywhere expansion using bind. A vector form of one element [x] is applied only to 'nothing' leaving
+  "Thread-anywhere expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
   'just' intact.
   Example usage                             Expanded as
   -------------                         | -----------
@@ -310,7 +311,7 @@
 
 
 (defmacro trial->
-  "Thread-first expansion using bind-either. A vector form of one element [x] is applied only to 'thrown' leaving
+  "Thread-first expansion using bind-trial. A vector form of one element [x] is applied only to 'thrown' leaving
   'result' intact.
   Example usage                           Expanded as
   -------------                         | -----------

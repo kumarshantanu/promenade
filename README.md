@@ -44,7 +44,7 @@ You may find similarities to this library in the following work:
 
 ## Usage
 
-Clojars coordinates: `[promenade "0.5.1"]`
+[![Clojars Project](https://img.shields.io/clojars/v/promenade.svg)](https://clojars.org/promenade)
 
 See [Documentation](doc/intro.md)
 
