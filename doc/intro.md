@@ -39,7 +39,7 @@ can be done in the sequence.
 Sequences like these can be expressed in this library with more context-aware threading:
 
 ```clojure
-(either-> id
+(prom/either-> id
   lookup
   [(attempt-alternate-lookup id)]
   transform
