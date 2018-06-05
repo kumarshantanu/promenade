@@ -10,6 +10,12 @@
   - Enum
 
 
+## 0.5.2 / 2018-June-05
+
+- Do not need to do `require-macros` at usage site (@awkay)
+- Improved documentation (@awkay)
+
+
 ## 0.5.1 / 2018-April-11
 
 - Factor out `doo` related namespaces into a separate directory
