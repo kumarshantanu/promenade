@@ -10,6 +10,16 @@
   - Enum
 
 
+## 0.6.0 / 2018-July-??
+
+- [Todo] Add `mreduce` to reduce over potentially contextual values
+- [Todo] Add trial convenience macros that automatically catch exceptions
+  - [Todo] `!trial->`
+  - [Todo] `!trial->>`
+  - [Todo] `!trial-as->`
+- [Idea] Support catching specific exceptions in `!trial` macros
+
+
 ## 0.5.2 / 2018-June-05
 
 - Do not need to do `require-macros` at usage site (@awkay)

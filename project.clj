@@ -1,4 +1,4 @@
-(defproject promenade "0.5.2"
+(defproject promenade "0.6.0"
   :description "Take program design oddities in stride with Clojure/ClojureScript"
   :url "https://github.com/kumarshantanu/promenade"
   :license {:name "Eclipse Public License"
@@ -22,14 +22,15 @@
                                                            :pretty-print  true}}}}
                     :prep-tasks [["cljsbuild" "once"]]
                     :hooks      [leiningen.cljsbuild]}
-             :c17 {:dependencies [[org.clojure/clojure "1.7.0"]]}
-             :c18 {:dependencies [[org.clojure/clojure "1.8.0"]]}
-             :c19 {:dependencies [[org.clojure/clojure "1.9.0"]]}
+             :c07 {:dependencies [[org.clojure/clojure "1.7.0"]]}
+             :c08 {:dependencies [[org.clojure/clojure "1.8.0"]]}
+             :c09 {:dependencies [[org.clojure/clojure "1.9.0"]]}
+             :c10 {:dependencies [[org.clojure/clojure "1.10.0-alpha6"]]}
              :s09 {:dependencies [[org.clojure/clojure "1.9.0"]
                                   [org.clojure/clojurescript "1.9.946"]]}
              :s10 {:dependencies [[org.clojure/clojure "1.9.0"]
-                                  [org.clojure/clojurescript "1.10.238"]]}
+                                  [org.clojure/clojurescript "1.10.339"]]}
              :dln {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}}
-  :aliases {"clj-test"  ["with-profile" "c17:c18:c19" "test"]
+  :aliases {"clj-test"  ["with-profile" "c07:c08:c09" "test"]
             "cljs-test" ["with-profile" "cljs,s09:cljs,s10" "doo" "node" "once"]}
   :deploy-repositories [["releases" {:url "https://clojars.org" :creds :gpg}]])
