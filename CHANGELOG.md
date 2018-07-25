@@ -10,18 +10,22 @@
   - Enum
 
 
-## 0.6.0 / 2018-July-??
+## [WIP] 0.6.0 / 2018-July-??
+
+- [Todo] Add trial convenience macros that automatically catch exceptions
+  - [Todo] `!trial->`
+  - [Todo] `!trial->>`
+  - [Todo] `!trial-as->`
+- [Idea] Support catching specific exceptions in `!trial` macros
+
+
+## 0.6.0-alpha1 / 2018-July-25
 
 - Add support for reducing functions (that work with clojure.core/reduce, transducers)
   - `refn`    - construct a reducing function that terminates on encountering a context
   - `!refn`   - construct a reducing function that terminates on encountering a context or exception
   - `rewrap`  - wrap a reducing function such that it terminates on encountering a context
   - `!rewrap` - wrap a reducing function such that it terminates on encountering a context or exception
-- [Todo] Add trial convenience macros that automatically catch exceptions
-  - [Todo] `!trial->`
-  - [Todo] `!trial->>`
-  - [Todo] `!trial-as->`
-- [Idea] Support catching specific exceptions in `!trial` macros
 
 
 ## 0.5.2 / 2018-June-05
