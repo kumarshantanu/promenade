@@ -12,7 +12,11 @@
 
 ## 0.6.0 / 2018-July-??
 
-- [Todo] Add `mreduce` to reduce over potentially contextual values
+- Add support for reducing functions (that work with clojure.core/reduce, transducers)
+  - `refn`    - construct a reducing function that terminates on encountering a context
+  - `!refn`   - construct a reducing function that terminates on encountering a context or exception
+  - `rewrap`  - wrap a reducing function such that it terminates on encountering a context
+  - `!rewrap` - wrap a reducing function such that it terminates on encountering a context or exception
 - [Todo] Add trial convenience macros that automatically catch exceptions
   - [Todo] `!trial->`
   - [Todo] `!trial->>`

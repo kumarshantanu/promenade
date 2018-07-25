@@ -443,3 +443,99 @@
     (is (= prom/nothing (prom/cond-mlet
                           [a (prom/mfailure 10)] (inc a)
                           [a (prom/mthrown 20)]  (inc a))))))
+
+
+(deftest test-refn
+  (let [f (prom/refn [a x] (if (zero? x) prom/failure (* a x)))]
+    (-> f
+      (reduce 1 [1 2 3 4 5 6 7 8 9])
+      prom/free?
+      (is "happy case"))
+    (-> f
+      (reduce 1 [1 2 3 0 5 6 7 8 9])
+      prom/failure?
+      (is "failure case")))
+  (let [f (prom/refn prom/nothing? [a x] (if (zero? x) prom/nothing (* a x)))]
+    (-> f
+      (reduce 1 [1 2 3 4 5 6 7 8 9])
+      prom/free?
+      (is "happy case"))
+    (-> f
+      (reduce 1 [1 2 3 0 5 6 7 8 9])
+      prom/nothing?
+      (is "failure case"))))
+
+
+(deftest test-!refn
+  (let [f (prom/!refn [a x] (if (zero? x) (throw (throwable "Multiplication by zero"))
+                              (* a x)))]
+    (-> f
+      (reduce 1 [1 2 3 4 5 6 7 8 9])
+      prom/free?
+      (is "happy case"))
+    (-> f
+      (reduce 1 [1 2 3 0 5 6 7 8 9])
+      prom/thrown?
+      (is "failure case")))
+  (let [f (prom/!refn #?(:cljs js/Error :clj RuntimeException)
+            [a x] (if (zero? x)
+                    (throw
+                      #?(:cljs (js/Error. "Multiplication by zero")
+                          :clj (RuntimeException. "Multiplication by zero")))
+                    (* a x)))]
+    (-> f
+      (reduce 1 [1 2 3 4 5 6 7 8 9])
+      prom/free?
+      (is "happy case"))
+    (-> f
+      (reduce 1 [1 2 3 0 5 6 7 8 9])
+      prom/thrown?
+      (is "failure case"))))
+
+
+(deftest test-rewrap
+  (let [f (prom/rewrap (fn [a x] (if (zero? x) prom/failure (* a x))))]
+    (-> f
+      (reduce 1 [1 2 3 4 5 6 7 8 9])
+      prom/free?
+      (is "happy case"))
+    (-> f
+      (reduce 1 [1 2 3 0 5 6 7 8 9])
+      prom/failure?
+      (is "failure case")))
+  (let [f (prom/rewrap prom/nothing? (fn [a x] (if (zero? x) prom/nothing (* a x))))]
+    (-> f
+      (reduce 1 [1 2 3 4 5 6 7 8 9])
+      prom/free?
+      (is "happy case"))
+    (-> f
+      (reduce 1 [1 2 3 0 5 6 7 8 9])
+      prom/nothing?
+      (is "failure case"))))
+
+
+(deftest test-!rewrap
+  (let [f (prom/!rewrap (fn [a x] (if (zero? x) (throw (throwable "Multiplication by zero"))
+                                    (* a x))))]
+    (-> f
+      (reduce 1 [1 2 3 4 5 6 7 8 9])
+      prom/free?
+      (is "happy case"))
+    (-> f
+      (reduce 1 [1 2 3 0 5 6 7 8 9])
+      prom/thrown?
+      (is "failure case")))
+  (let [f (prom/!rewrap #?(:cljs js/Error :clj RuntimeException)
+            (fn [a x] (if (zero? x)
+                        (throw
+                          #?(:cljs (js/Error. "Multiplication by zero")
+                              :clj (RuntimeException. "Multiplication by zero")))
+                        (* a x))))]
+    (-> f
+      (reduce 1 [1 2 3 4 5 6 7 8 9])
+      prom/free?
+      (is "happy case"))
+    (-> f
+      (reduce 1 [1 2 3 0 5 6 7 8 9])
+      prom/thrown?
+      (is "failure case"))))

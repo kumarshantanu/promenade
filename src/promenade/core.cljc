@@ -533,3 +533,71 @@
         `(if ~test
            ~expr
            (cond-mlet ~@more))))))
+
+
+;; ----- Support for reducing functions -----
+
+
+(defmacro refn
+  "Given `accumulator` and `each` arguments placeholder and an S-expression to evaluate, return a reducing function
+  (fn [accumulator each]) that bails out on encountering a context.
+  Example: (reduce (refn [vs x] (if (odd? x) (conj vs (* x 2)) vs)) [] coll)"
+  ([argvec expr]
+    `(refn context? ~argvec ~expr))
+  ([context-pred argvec expr]
+    (i/expected vector? "argument vector" argvec)
+    (i/expected #(= 2 (count %)) "2-argument vector" argvec)
+    (let [[acc each] argvec]
+      `(fn
+         ([] (i/throw-unsupported "Unsupported arity"))
+         ([~acc ~each] (let [result# ~expr]
+                         (if (~context-pred result#)
+                           (reduced result#)
+                           result#)))))))
+
+
+(defmacro !refn
+  "Given `accumulator` and `each` argument placeholders and an S-expression to evaluate, return a reducing function
+  (fn [acc each]) that bails out on encountering a context or exception.
+  Example: (reduce (!refn NullPointerException [vs x] (if (odd? x) (conj vs (/ (count vs) x)) vs)) [] coll)"
+  ([argvec expr]
+    (i/expected vector? "argument vector" argvec)
+    (i/expected #(= 2 (count %)) "2-argument vector" argvec)
+    (let [[acc each] argvec]
+      `(fn
+         ([] (i/throw-unsupported "Unsupported arity"))
+         ([~acc ~each] (let [r# (! ~expr)]
+                         (if (context? r#)
+                           (reduced r#)
+                           r#))))))
+  ([classes argvec expr]
+    `(!refn ~classes context? ~argvec ~expr))
+  ([classes context-pred argvec expr]
+    (let [[acc each] argvec]
+      `(fn
+         ([] (i/throw-unsupported "Unsupported arity"))
+         ([~acc ~each] (let [result# (! ~classes ~expr)]
+                         (if (~context-pred result#)
+                           (reduced result#)
+                           result#)))))))
+
+
+(defmacro rewrap
+  "Given a reducing function (fn [val each]) wrap it such that it bails out on encountering a context.
+  Example: (reduce (rewrap f) init coll)"
+  ([f]
+    `(rewrap context? ~f))
+  ([context-pred f]
+    `(refn ~context-pred [acc# each#]
+       (~f acc# each#))))
+
+
+(defmacro !rewrap
+  "Given a reducing function (fn [val each]) wrap it such that it bails out on encountering a context or exception.
+  Usage: (reduce (!rewrap NullPointerException f) init coll)"
+  ([f]
+    `(refn [acc# each#] (! (~f acc# each#))))
+  ([classes f]
+    `(!rewrap ~classes context? ~f))
+  ([classes context-pred f]
+    `(refn ~context-pred [acc# each#] (! ~classes (~f acc# each#)))))
