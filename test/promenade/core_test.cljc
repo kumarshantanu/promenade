@@ -27,6 +27,7 @@
     (is ((every-pred prom/nothing? prom/context?) (prom/void :foo)))
     (is ((every-pred prom/thrown?  prom/context?) (prom/thrown (throwable "test"))))
     (is ((every-pred prom/thrown?  prom/context?) (prom/! (throw (throwable "test")))))
+    (is ((every-pred prom/thrown?  prom/context?) ((prom/!wrap (fn [] (throw (throwable "test")))))))
     (is (prom/free? :foo)))
   (testing "Negative tests"
     (is (not (prom/failure? prom/nothing)))

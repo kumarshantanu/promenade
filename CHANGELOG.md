@@ -12,11 +12,7 @@
 
 ## [WIP] 0.6.0 / 2018-July-??
 
-- [Todo] Add trial convenience macros that automatically catch exceptions
-  - [Todo] `!trial->`
-  - [Todo] `!trial->>`
-  - [Todo] `!trial-as->`
-- [Idea] Support catching specific exceptions in `!trial` macros
+- Add `!wrap` macro to wrap functions to return thrown context on exception
 
 
 ## 0.6.0-alpha1 / 2018-July-25

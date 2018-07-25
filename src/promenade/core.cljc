@@ -83,7 +83,7 @@
 
 
 (defmacro !
-  "Evaluate given form and return it; on exception return the exception as thrown result."
+  "Evaluate given form and return it; on exception return the exception as thrown context."
   ([x]
     ;; In CLJS `defmacro` is called by ClojureJVM, hence reader conditionals always choose :clj -
     ;; so we discover the environment using a hack (:ns &env), which returns truthy for CLJS.
@@ -100,6 +100,16 @@
                                                                  catch-class))]
                      `(try ~x
                         ~@catch-clauses))))
+
+
+(defmacro !wrap
+  "Wrap given function such that on exception it returns the exception as a thrown context."
+  ([f]
+    `(fn [& args#]
+       (! (apply ~f args#))))
+  ([catch-class f]
+    `(fn [& args#]
+       (! ~catch-class (apply ~f args#)))))
 
 
 ;;~~~~~~~~~~~~~~~~
