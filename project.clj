@@ -1,4 +1,4 @@
-(defproject promenade "0.6.0-alpha1"
+(defproject promenade "0.6.0-alpha2"
   :description "Take program design oddities in stride with Clojure/ClojureScript"
   :url "https://github.com/kumarshantanu/promenade"
   :license {:name "Eclipse Public License"
@@ -31,6 +31,6 @@
              :s10 {:dependencies [[org.clojure/clojure "1.9.0"]
                                   [org.clojure/clojurescript "1.10.339"]]}
              :dln {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}}
-  :aliases {"clj-test"  ["with-profile" "c07:c08:c09" "test"]
+  :aliases {"clj-test"  ["with-profile" "c07:c08:c09:c10" "test"]
             "cljs-test" ["with-profile" "cljs,s09:cljs,s10" "doo" "node" "once"]}
   :deploy-repositories [["releases" {:url "https://clojars.org" :creds :gpg}]])
