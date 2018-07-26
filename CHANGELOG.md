@@ -14,6 +14,7 @@
 
 - Add `!wrap` macro to wrap functions to return thrown context on exception
 - Drop `!refn` macro in favour of `!wrap` and `refn`
+- Drop `!rewrap` macro in favour of `!wrap` and `rewrap`
 
 
 ## 0.6.0-alpha1 / 2018-July-25

@@ -574,14 +574,3 @@
   ([context-pred f]
     `(refn ~context-pred [acc# each#]
        (~f acc# each#))))
-
-
-(defmacro !rewrap
-  "Given a reducing function (fn [val each]) wrap it such that it bails out on encountering a context or exception.
-  Usage: (reduce (!rewrap NullPointerException f) init coll)"
-  ([f]
-    `(refn [acc# each#] (! (~f acc# each#))))
-  ([classes f]
-    `(!rewrap ~classes context? ~f))
-  ([classes context-pred f]
-    `(refn ~context-pred [acc# each#] (! ~classes (~f acc# each#)))))
