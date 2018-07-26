@@ -566,11 +566,15 @@
                            result#)))))))
 
 
-(defmacro rewrap
+(defn rewrap
   "Given a reducing function (fn [val each]) wrap it such that it bails out on encountering a context.
   Example: (reduce (rewrap f) init coll)"
   ([f]
-    `(rewrap context? ~f))
+    (rewrap context? f))
   ([context-pred f]
-    `(refn ~context-pred [acc# each#]
-       (~f acc# each#))))
+    (fn
+      ([] (i/throw-unsupported "Unsupported arity"))
+      ([acc each] (let [result (f acc each)]
+                    (if (context-pred result)
+                      (reduced result)
+                      result))))))
