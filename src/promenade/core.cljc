@@ -566,32 +566,6 @@
                            result#)))))))
 
 
-(defmacro !refn
-  "Given `accumulator` and `each` argument placeholders and an S-expression to evaluate, return a reducing function
-  (fn [acc each]) that bails out on encountering a context or exception.
-  Example: (reduce (!refn NullPointerException [vs x] (if (odd? x) (conj vs (/ (count vs) x)) vs)) [] coll)"
-  ([argvec expr]
-    (i/expected vector? "argument vector" argvec)
-    (i/expected #(= 2 (count %)) "2-argument vector" argvec)
-    (let [[acc each] argvec]
-      `(fn
-         ([] (i/throw-unsupported "Unsupported arity"))
-         ([~acc ~each] (let [r# (! ~expr)]
-                         (if (context? r#)
-                           (reduced r#)
-                           r#))))))
-  ([classes argvec expr]
-    `(!refn ~classes context? ~argvec ~expr))
-  ([classes context-pred argvec expr]
-    (let [[acc each] argvec]
-      `(fn
-         ([] (i/throw-unsupported "Unsupported arity"))
-         ([~acc ~each] (let [result# (! ~classes ~expr)]
-                         (if (~context-pred result#)
-                           (reduced result#)
-                           result#)))))))
-
-
 (defmacro rewrap
   "Given a reducing function (fn [val each]) wrap it such that it bails out on encountering a context.
   Example: (reduce (rewrap f) init coll)"
