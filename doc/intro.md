@@ -72,6 +72,7 @@ The base library defines these contexts:
 There are support functions for creating and testing for these:
 
 * `(prom/! form)` - Runs form. If an exception is thrown, returns a `Thrown` context instead. `deref` can be used to access the exception details.
+* `(prom/!wrap f)` - Wraps fn `f` returning `(fn [& args] (prom/! (apply f args)))`.
 * `(prom/thrown ex)` - A Thrown with an exception (`deref` can be used to get the exception)
 * `prom/nothing` - The Nothing context
 * `prom/failure` - A generic non-informative Failure
@@ -235,8 +236,9 @@ uses `thrown?` to detect the cases that should be error-handled.
 
 The one major difference is that since exceptions normally unroll the stack we'll need
 a way for functions to turn the thrown exception into a context value.
-We can capture exceptions and return as _Thrown_ using the `prom/!` macro, e.g. `(prom/! (third-party-code))`, or construct one using
-`(prom/thrown ex)` function.
+We can capture exceptions and return as _Thrown_ using the `prom/!` macro, e.g. `(prom/! (third-party-code))`, or
+construct one using `(prom/thrown ex)` function. (Alternatively, the `!wrap` macro can make a function return a _Thrown_
+instead of throwing an exception.)
 
 For example:
 
@@ -279,6 +281,30 @@ fine for *any* of the steps above to return whatever kind of context they want. 
 functions above by wrapping the body with a `(prom/! ...)`. This means that any unexpected exception would naturally flow down
 to the final `trial->` error handler.
 
+## Reducing-functions
+
+When working with `clojure.core/reduce` or transducers, in some conditions you may want to terminate sequence processing
+early by returning `(reduced result)`. Promenade supports automatic early termination by detecting a context result.
+Consider the example below:
+
+```clojure
+(reduce (prom/refn [a x]    ; refn returns (fn [a x])
+          (prom/either->> x
+            process-valid-item
+            (conj a)))
+  [] found-items)
+
+;; or
+
+(defn process-all [a x]
+  (prom/either->> x
+    process-valid-item
+    (conj a)))
+
+(reduce (rewrap process-all)  ; rewrap accepts (fn [a x]), returns (fn [a x])
+  [] found-items)
+```
+
 ## Low level control during sequence operations
 
 Often we may need to branch our decisions based on whether items in a sequence are failure/nothing/thrown/context or
@@ -289,18 +315,6 @@ items that are not ordinary values:
 (def process-valid-item (prom/branch prom/free? process-item))
 
 (map process-valid-item found-items)  ; process each item that is context-free (not a context)
-```
-
-Another use-case may be where we have to abort processing a sequence based on occurence of even a single error. The
-following snippet shows such a use-case:
-
-```clojure
-(def context->reduced (prom/branch prom/context? reduced))
-
-(reduce (fn [a x] (context->reduced (prom/either->> x
-                                      process-valid-item
-                                      (conj a))))
-  [] found-items)
 ```
 
 
