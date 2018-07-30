@@ -247,12 +247,39 @@ For example:
   (prom/!
     (let [v (jdbc/query ...)]
       v)))
+
+;; or
+
+(def get-from-db
+  (!wrap (fn [id]
+           (prom/!
+             (let [v (jdbc/query ...)]
+               v)))))
 ```
 
 will ensure that any thrown exceptions will be converted to a `Thrown` context
 value and returned instead.
 
-You may chain together several bind-trial operations using macros `trial->`, `trial->>` and `trial-as->`.
+You may chain together several bind-trial operations using macros `trial->`, `trial->>` and `trial-as->`. Consider the
+code snippet below - both examples in the snippet achieve the same purpose.
+
+```clojure
+(prom/trial-as-> id $
+  (! (http/fetch-by-key $))  ; fetch-by-key may throw
+  [(fallback-fetch id $)]
+  (! (process-item $))       ; process-item may throw
+  [(error-report $)])
+
+;; or
+
+(let [r-fetch (prom/!wrap http/fetch-by-key)  ; wrap functions that may throw
+      process (prom/!wrap process-item)]
+  (prom/trial->> id
+    r-fetch
+    [(fallback-fetch id)]
+    process
+    [error-report]))
+```
 
 ## Composition
 
