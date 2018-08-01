@@ -134,3 +134,9 @@
                       (let [~lhs (if mi?# (:value rhs#) rhs#)]
                         ~@restof-expansion)))
         (or (meta rhs) (meta lhs))))))
+
+
+(defn throw-unsupported
+  [msg]
+  (throw #?(:cljs (js/Error. msg)
+             :clj (UnsupportedOperationException. ^String msg))))

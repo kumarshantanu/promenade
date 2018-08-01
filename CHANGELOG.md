@@ -10,6 +10,28 @@
   - Enum
 
 
+## [WIP] 0.6.0 / 2018-August-??
+
+- Doumentation
+
+
+## 0.6.0-alpha2 / 2018-July-26
+
+- Add `!wrap` macro to wrap functions to return thrown context on exception
+- Drop `!refn` macro in favour of `!wrap` and `refn`
+- Drop `!rewrap` macro in favour of `!wrap` and `rewrap`
+- Turn `rewrap` from a macro into a function
+
+
+## 0.6.0-alpha1 / 2018-July-25
+
+- Add support for reducing functions (that work with clojure.core/reduce, transducers)
+  - `refn`    - construct a reducing function that terminates on encountering a context
+  - `!refn`   - construct a reducing function that terminates on encountering a context or exception
+  - `rewrap`  - wrap a reducing function such that it terminates on encountering a context
+  - `!rewrap` - wrap a reducing function such that it terminates on encountering a context or exception
+
+
 ## 0.5.2 / 2018-June-05
 
 - Do not need to do `require-macros` at usage site (@awkay)

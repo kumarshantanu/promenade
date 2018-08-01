@@ -83,7 +83,7 @@
 
 
 (defmacro !
-  "Evaluate given form and return it; on exception return the exception as thrown result."
+  "Evaluate given form and return it; on exception return the exception as thrown context."
   ([x]
     ;; In CLJS `defmacro` is called by ClojureJVM, hence reader conditionals always choose :clj -
     ;; so we discover the environment using a hack (:ns &env), which returns truthy for CLJS.
@@ -100,6 +100,16 @@
                                                                  catch-class))]
                      `(try ~x
                         ~@catch-clauses))))
+
+
+(defmacro !wrap
+  "Wrap given function such that on exception it returns the exception as a thrown context."
+  ([f]
+    `(fn [& args#]
+       (! (apply ~f args#))))
+  ([catch-class f]
+    `(fn [& args#]
+       (! ~catch-class (apply ~f args#)))))
 
 
 ;;~~~~~~~~~~~~~~~~
@@ -533,3 +543,38 @@
         `(if ~test
            ~expr
            (cond-mlet ~@more))))))
+
+
+;; ----- Support for reducing functions -----
+
+
+(defmacro refn
+  "Given `accumulator` and `each` arguments placeholder and an S-expression to evaluate, return a reducing function
+  (fn [accumulator each]) that bails out on encountering a context.
+  Example: (reduce (refn [vs x] (if (odd? x) (conj vs (* x 2)) vs)) [] coll)"
+  ([argvec expr]
+    `(refn context? ~argvec ~expr))
+  ([context-pred argvec expr]
+    (i/expected vector? "argument vector" argvec)
+    (i/expected #(= 2 (count %)) "2-argument vector" argvec)
+    (let [[acc each] argvec]
+      `(fn
+         ([] (i/throw-unsupported "Unsupported arity"))
+         ([~acc ~each] (let [result# ~expr]
+                         (if (~context-pred result#)
+                           (reduced result#)
+                           result#)))))))
+
+
+(defn rewrap
+  "Given a reducing function (fn [val each]) wrap it such that it bails out on encountering a context.
+  Example: (reduce (rewrap f) init coll)"
+  ([f]
+    (rewrap context? f))
+  ([context-pred f]
+    (fn
+      ([] (i/throw-unsupported "Unsupported arity"))
+      ([acc each] (let [result (f acc each)]
+                    (if (context-pred result)
+                      (reduced result)
+                      result))))))
