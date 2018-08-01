@@ -10,9 +10,9 @@
   - Enum
 
 
-## [WIP] 0.6.0 / 2018-July-??
+## [WIP] 0.6.0 / 2018-August-??
 
-- [Todo] Doumentation
+- Doumentation
 
 
 ## 0.6.0-alpha2 / 2018-July-26
