@@ -1,4 +1,4 @@
-(defproject promenade "0.6.0"
+(defproject promenade "0.7.0-SNAPSHOT"
   :description "Take program design oddities in stride with Clojure/ClojureScript"
   :url "https://github.com/kumarshantanu/promenade"
   :license {:name "Eclipse Public License"
@@ -25,7 +25,7 @@
              :c07 {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :c08 {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :c09 {:dependencies [[org.clojure/clojure "1.9.0"]]}
-             :c10 {:dependencies [[org.clojure/clojure "1.10.0-alpha6"]]}
+             :c10 {:dependencies [[org.clojure/clojure "1.10.0-beta4"]]}
              :s09 {:dependencies [[org.clojure/clojure "1.9.0"]
                                   [org.clojure/clojurescript "1.9.946"]]}
              :s10 {:dependencies [[org.clojure/clojure "1.9.0"]

@@ -10,6 +10,18 @@
   - Enum
 
 
+## [WIP] 0.7.0 / 2018-October-??
+
+- [Todo] Add reducing thread macros
+  - [Todo] `reduce->`
+  - [Todo] `reduce->>`
+  - [Todo] `reduce-as->`
+- [Todo] Deprecate bind macros
+  - [Todo] `either->`, `either->>`, `either-as->`
+  - [Todo] `maybe->`, `maybe->>`, `maybe-as->`
+  - [Todo] `trial->`, `trial->>`, `trial-as->`
+
+
 ## 0.6.0 / 2018-August-01
 
 - Add `!wrap` macro to wrap functions to return thrown context on exception
