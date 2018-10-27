@@ -32,51 +32,6 @@
       :clj (instance? IDeref x)))
 
 
-(defn invoke
-  [f & args]
-  (apply f args))
-
-
-(defn bind-expr
-  "Given a bind fn (fn [mv right-f] [mv left-f right-f]), left and right expander fns of the arity (fn [form]) and a
-  short bind-form, rewrite it as a bind expression."
-  [bind-f left-f right-f form]
-  (if (vector? form)
-    (case (count form)
-      2 `(~bind-f ~@(map invoke [left-f right-f] form))
-      1 `(~bind-f ~@(map invoke [left-f] form) identity)
-      (throw (ex-info (str "Expected vector form to have one or two elements, but found " form) {})))
-    `(~bind-f ~(right-f form))))
-
-
-(defn expand-nothing
-  [form]
-  (if (list? form)
-    (with-meta `(^:once fn* [_#] ~form) (meta form))
-    `(^:once fn* [_#] (~form))))
-
-
-(defn expand->
-  [form]
-  (if (list? form)
-    (with-meta `(^:once fn* [x#] (~(first form) x# ~@(rest form))) (meta form))
-    form))
-
-
-(defn expand->>
-  [form]
-  (if (list? form)
-    (with-meta `(^:once fn* [x#] (~(first form) ~@(rest form) x#)) (meta form))
-    form))
-
-
-(defn expand-as->
-  [name form]
-  (if (list? form)
-    (with-meta `(^:once fn* [~name] ~form) (meta form))
-    `(^:once fn* [~name] ~form)))
-
-
 ;; ----- context implementation -----
 
 

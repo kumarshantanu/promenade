@@ -279,12 +279,12 @@
           {:foo 1
            :bar 2}
           prom/void
-          [(* 0) (vector 2)]
+          [(or (* 0)) (vector 2)]
           inc)))
   (is (= 4
         (prom/maybe->> :foo
           prom/void
-          [(do 4)])) "1-element vector applies to the left ('nothing' in this case)")
+          [(or 4)])) "1-element vector applies to the left ('nothing' in this case)")
   (is (= :foo
         (prom/maybe->> :foo
           identity

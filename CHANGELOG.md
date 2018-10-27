@@ -12,17 +12,16 @@
 
 ## [WIP] 0.7.0 / 2018-October-??
 
-- Add reducing thread macros
-  - `reduce->`
-  - `reduce->>`
-  - `reduce-as->`
+- Add reducing thread macros `reduce->`, `reduce->>`, `reduce-as->`
+  - Support for early termination via `clojure.core/reduced`
+  - Support for custom bind functions
 - [BREAKING CHANGE] Accept `nil` as argument in `bind-maybe` nothing-handler
   - Consistent with other alt-handlers
-- [Todo] Base bind macros on reducing thread macros
-  - [Todo] `either->`, `either->>`, `either-as->`
-  - [Todo] `maybe->`, `maybe->>`, `maybe-as->`
+- Base bind thread macros on reducing thread macros
+  - `either->`, `either->>`, `either-as->`
+  - `maybe->`, `maybe->>`, `maybe-as->`
     - [BREAKING CHANGE] Nothing handler expression must handle the argument
-  - [Todo] `trial->`, `trial->>`, `trial-as->`
+  - `trial->`, `trial->>`, `trial-as->`
 
 
 ## 0.6.0 / 2018-August-01

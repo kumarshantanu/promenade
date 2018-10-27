@@ -219,7 +219,7 @@ Let us take the contrived use case of fetching some data from a database that is
 ```clojure
 (prom/maybe-> data-id  ; begin with data-id
   fetch-from-cache     ; attemp to fetch the data from cache, which may return a value or prom/nothing
-  [fetch-from-db]      ; if not found in cache then fetch from DB, which may return a value or prom/nothing
+  [(do (fetch-from-db)]; if not found in cache then fetch from DB, which may return a value or prom/nothing
   decompress)          ; if data was fetched then decompress it before returning to the caller
 ```
 
@@ -294,12 +294,12 @@ For example, the code snippet below enhances upon the use-case we saw in success
 ```clojure
 (-> order-id
   fetch-order-details-from-cache
-  (prom/maybe->   [(fetch-order-details-from-db)]) ; only error-handles Nothing. E.g. a cache miss
+  (prom/maybe->   [(do (fetch-order-details-from-db))]) ; only error-handles Nothing. E.g. a cache miss
   (prom/either->  check-inventory)
   (prom/either->> [(cancel-order order-id) process-order]) ; Either cancel the order due to Failure, or process valid values
   (prom/either->  [stock-replenish-init]) ; Only if the prior step result was a Failure
   (prom/either->  fulfil-order)           ; Only if we still have a valid value
-  (prom/maybe->   [not-found-error])      ; Handle the possiblity that Nothing flowed through from the fetch
+  (prom/maybe->   [(do (not-found-error))]); Handle the possiblity that Nothing flowed through from the fetch
   (prom/trial->   [generate-error]))      ; Handle any exceptions. Any of the above steps could have returned a Thrown
 ```
 
@@ -331,6 +331,11 @@ Consider the example below:
 (reduce (rewrap process-all)  ; rewrap accepts (fn [a x]), returns (fn [a x])
   [] found-items)
 ```
+
+### Early termination
+
+The _either_, _maybe_ and _trial_ threading macros are based on _reduce_, hence you may terminate the
+chain of expressions early by returning a returning a value wrapped with `clojure.core/reduced`.
 
 ## Low level control during sequence operations
 
