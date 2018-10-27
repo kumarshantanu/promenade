@@ -52,8 +52,8 @@
 (defn expand-nothing
   [form]
   (if (list? form)
-    (with-meta `(^:once fn* [] ~form) (meta form))
-    `(^:once fn* [] (~form))))
+    (with-meta `(^:once fn* [_#] ~form) (meta form))
+    `(^:once fn* [_#] (~form))))
 
 
 (defn expand->
@@ -140,16 +140,6 @@
   [msg]
   (throw #?(:cljs (js/Error. msg)
              :clj (UnsupportedOperationException. ^String msg))))
-
-
-(defn contains-recursively?
-  [haystack needle]
-  (or (= needle haystack)
-    (cond
-      (map? haystack)    (some #(contains-recursively? % needle)
-                           (concat (keys haystack) (vals haystack)))
-      (coll? haystack)   (some #(contains-recursively? % needle) haystack)
-      :otherwise         false)))
 
 
 (defn reduce-form-fn

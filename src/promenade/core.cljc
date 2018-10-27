@@ -176,7 +176,7 @@
                    mval
                    (just-f mval)))
   ([mval nothing-f just-f] (cond
-                             (nothing? mval) (nothing-f)
+                             (nothing? mval) (nothing-f nil)
                              (context? mval) mval
                              :otherwise      (just-f mval))))
 
@@ -578,9 +578,7 @@
   [bind expr name & forms]
   (i/expected symbol? "placeholder name to be a symbol" name)
   (-> (fn [form]
-        (with-meta (if (i/contains-recursively? form name)
-                     `(^:once fn* [~name] ~form)
-                     `(^:once fn* ([] ~form) ([~name] ~form)))
+        (with-meta `(^:once fn* [~name] ~form)
           (meta form)))
     (i/gen-reduce bind expr forms)))
 

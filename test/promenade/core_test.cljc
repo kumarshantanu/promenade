@@ -213,10 +213,10 @@
   (is (= :foo (prom/bind-maybe :foo identity)))
   (is (= 1000 (-> :foo
                 (prom/bind-maybe (constantly prom/nothing))
-                (prom/bind-maybe #(do 1000) vector))) "failure channel")
+                (prom/bind-maybe (fn [_] 1000) vector))) "failure channel")
   (is (= [20] (-> :foo
                 (prom/bind-maybe {:foo 20})
-                (prom/bind-maybe #(do 1000) vector))) "success channel"))
+                (prom/bind-maybe (fn [_] 1000) vector))) "success channel"))
 
 
 (deftest test-maybe->
@@ -305,13 +305,13 @@
           {:foo 1
            :bar 2}
           prom/void
-          [(* 0) (vector 2)]
+          [(or (* 0)) (vector 2)]
           inc)))
   (is (= 4
         (prom/reduce->> prom/bind-maybe
           :foo
           prom/void
-          [(do 4)])) "1-element vector applies to the left ('nothing' in this case)")
+          [(or 4)])) "1-element vector applies to the left ('nothing' in this case)")
   (is (= :foo
         (prom/reduce->> prom/bind-maybe
           :foo

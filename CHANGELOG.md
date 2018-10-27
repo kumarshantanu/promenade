@@ -16,9 +16,7 @@
   - `reduce->`
   - `reduce->>`
   - `reduce-as->`
-- [Todo] Make `Nothing` deref'able, returning `nil`
-  - Consistent with other context types
-- [Todo - BREAKING CHANGE] Make (in `bind-maybe`) nothing-handler accept deref'ed `Nothing`
+- [BREAKING CHANGE] Accept `nil` as argument in `bind-maybe` nothing-handler
   - Consistent with other alt-handlers
 - [Todo] Base bind macros on reducing thread macros
   - [Todo] `either->`, `either->>`, `either-as->`
