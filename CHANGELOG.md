@@ -12,13 +12,18 @@
 
 ## [WIP] 0.7.0 / 2018-October-??
 
-- [Todo] Add reducing thread macros
-  - [Todo] `reduce->`
-  - [Todo] `reduce->>`
-  - [Todo] `reduce-as->`
-- [Todo] Deprecate bind macros
+- Add reducing thread macros
+  - `reduce->`
+  - `reduce->>`
+  - `reduce-as->`
+- [Todo] Make `Nothing` deref'able, returning `nil`
+  - Consistent with other context types
+- [Todo - BREAKING CHANGE] Make (in `bind-maybe`) nothing-handler accept deref'ed `Nothing`
+  - Consistent with other alt-handlers
+- [Todo] Base bind macros on reducing thread macros
   - [Todo] `either->`, `either->>`, `either-as->`
   - [Todo] `maybe->`, `maybe->>`, `maybe-as->`
+    - [BREAKING CHANGE] Nothing handler expression must handle the argument
   - [Todo] `trial->`, `trial->>`, `trial-as->`
 
 

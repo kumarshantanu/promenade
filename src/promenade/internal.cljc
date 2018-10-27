@@ -140,3 +140,34 @@
   [msg]
   (throw #?(:cljs (js/Error. msg)
              :clj (UnsupportedOperationException. ^String msg))))
+
+
+(defn contains-recursively?
+  [haystack needle]
+  (or (= needle haystack)
+    (cond
+      (map? haystack)    (some #(contains-recursively? % needle)
+                           (concat (keys haystack) (vals haystack)))
+      (coll? haystack)   (some #(contains-recursively? % needle) haystack)
+      :otherwise         false)))
+
+
+(defn reduce-form-fn
+  [make-handler form bind]
+  (if (vector? form)
+    (case (count form)
+      1 (let [[alt-handler] form]
+          `[~bind ~(make-handler alt-handler) identity])
+      2 (let [[alt-handler val-handler] form]
+          `[~bind ~(make-handler alt-handler) ~(make-handler val-handler)])
+      3 (let [[bind alt-handler val-handler] form]
+          `[~bind ~(make-handler alt-handler) ~(make-handler val-handler)])
+      (expected "vector containing either 1, 2 or 3 forms" form))
+    `[~bind identity ~(make-handler form)]))
+
+
+(defn gen-reduce
+  [make-handler bind expr forms]
+  `(reduce (fn [accumulator# [bind# alt-handler# val-handler#]]
+             (bind# accumulator# alt-handler# val-handler#))
+     ~expr [~@(map #(reduce-form-fn make-handler % bind) forms)]))

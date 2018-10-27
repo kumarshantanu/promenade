@@ -548,6 +548,43 @@
 ;; ----- Support for reducing functions -----
 
 
+(defmacro reduce->
+  "Given a bind function (fn [mval alt-fn val-fn]) -> mval and one or more expressions in thread-first form,
+  reduce over the expressions returning the final result. Use clojure.core/reduced for early termination."
+  [bind expr & forms]
+  (-> (fn [form]
+        (with-meta (if (seq? form)
+                     `(^:once fn* [arg#] (~(first form) arg# ~@(rest form)))
+                     `(^:once fn* [arg#] (~form arg#)))
+          (meta form)))
+    (i/gen-reduce bind expr forms)))
+
+
+(defmacro reduce->>
+  "Given a bind function (fn [mval alt-fn val-fn]) -> mval and one or more expressions in thread-last form,
+  reduce over the expressions returning the final result. Use clojure.core/reduced for early termination."
+  [bind expr & forms]
+  (-> (fn [form]
+        (with-meta (if (seq? form)
+                     `(^:once fn* [arg#] (~@form arg#))
+                     `(^:once fn* [arg#] (~form arg#)))
+          (meta form)))
+    (i/gen-reduce bind expr forms)))
+
+
+(defmacro reduce-as->
+  "Given a bind function (fn [mval alt-fn val-fn]) -> mval, a name to bind and one or more expressions in thread-as
+  form, reduce over the expressions returning the final result. Use clojure.core/reduced for early termination."
+  [bind expr name & forms]
+  (i/expected symbol? "placeholder name to be a symbol" name)
+  (-> (fn [form]
+        (with-meta (if (i/contains-recursively? form name)
+                     `(^:once fn* [~name] ~form)
+                     `(^:once fn* ([] ~form) ([~name] ~form)))
+          (meta form)))
+    (i/gen-reduce bind expr forms)))
+
+
 (defmacro refn
   "Given `accumulator` and `each` arguments placeholder and an S-expression to evaluate, return a reducing function
   (fn [accumulator each]) that bails out on encountering a context.
