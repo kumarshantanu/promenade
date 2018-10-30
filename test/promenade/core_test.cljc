@@ -130,22 +130,22 @@
           {:foo 1
            :bar 2}
           [(* 0) (vector 2)]
-          first)))
+          first)) "All success, with 2-element vector")
   (is (= 1
         (prom/either->> :foo
           {:foo 1
            :bar 2}
           prom/fail
           [(* 0) (vector 2)]
-          inc)))
+          inc)) "Failure and recovery")
   (is (= [:foo]
         (prom/either->> :foo
           prom/fail
-          [vector])) "1-element vector applies to the left ('failure' in this case)")
-  (is (= :foo
+          [vector])) "1-element vector (applies to the left, 'failure' in this case)")
+  (is (= :bar
         (prom/either->> :foo
-          identity
-          [vector])) "1-element vector applies to the left ('failure' in this case)"))
+          prom/void
+          [prom/bind-maybe (or :bar) {:foo 10}])) "3-element vector (applies to foreign bind, 'maybe' in this case)"))
 
 
 (deftest test-either-as->
@@ -154,21 +154,22 @@
           ({:foo 1
             :bar 2} $)
           [(* 0 $) (vector $ 2)]
-          (first $))))
+          (first $))) "All success, with 2-element vector")
   (is (= 30
         (prom/either-as-> :foo $
           ({:foo 1
             :bar 2} $)
+          (prom/fail 20)
           [(* 0 $) (vector $ 2)]
-          30)))
+          (+ 30 $))) "Failure and recovery")
   (is (= [:foo]
         (prom/either-as-> :foo $
           (prom/fail [$])
-          [$])) "1-element vector applies to the left ('failure' in this case)")
-  (is (= [:foo]
+          [$])) "1-element vector (applies to the left, 'failure' in this case)")
+  (is (= :bar
         (prom/either-as-> :foo $
-          (vector $)
-          [$])) "1-element vector applies to the left ('failure' in this case)"))
+          (prom/void $)
+          [prom/bind-maybe :bar {:foo 10}])) "3-element vector (applies to foreign bind, 'maybe' in this case)"))
 
 
 (deftest test-bind-maybe
