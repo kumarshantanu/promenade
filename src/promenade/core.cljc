@@ -176,7 +176,7 @@
                    mval
                    (just-f mval)))
   ([mval nothing-f just-f] (cond
-                             (nothing? mval) (nothing-f)
+                             (nothing? mval) (nothing-f nil)
                              (context? mval) mval
                              :otherwise      (just-f mval))))
 
@@ -196,188 +196,6 @@
                               (thrown? mval)  (thrown-f (deref mval))
                               (context? mval) mval
                               :otherwise      (result-f mval))))
-
-
-;; ----- Pipeline macros -----
-
-
-(defmacro either->
-  "Thread-first expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
-  'success' intact.
-  Example usage                           Expanded as
-  -------------                         | -----------
-  (either-> (place-order)               | (-> (place-order)
-    (check-inventory :foo)              |   (bind-either (fn [x] (check-inventory x :foo)))
-    [(cancel-order :bar) process-order] |   (bind-either (fn [x] (cancel-order x :bar)) process-order)
-    fulfil-order)                       |   (bind-either fulfil-order))
-  See:
-    either->>
-    either-as->
-    maybe->
-    trial->"
-  [x & forms]
-  `(-> ~x
-     ~@(map #(i/bind-expr 'promenade.core/bind-either i/expand-> i/expand-> %) forms)))
-
-
-(defmacro either->>
-  "Thread-last expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
-  'success' intact.
-  Example usage                           Expanded as
-  -------------                         | -----------
-  (either->> (place-order)              | (-> (place-order)
-    (check-inventory :foo)              |   (bind-either (fn [x] (check-inventory :foo x)))
-    [(cancel-order :bar) process-order] |   (bind-either (fn [x] (cancel-order :bar x)) process-order)
-    fulfil-order)                       |   (bind-either fulfil-order))
-  See:
-    either->
-    either-as->
-    maybe->>
-    trial->>"
-  [x & forms]
-  `(-> ~x
-     ~@(map #(i/bind-expr 'promenade.core/bind-either i/expand->> i/expand->> %)
-         forms)))
-
-
-(defmacro either-as->
-  "Thread-anywhere expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
-  'success' intact.
-  Example usage                             Expanded as
-  -------------                           | -----------
-  (either-as-> (place-order) $            | (-> (place-order)
-    (check-inventory $ :foo)              |   (bind-either (fn [$] (check-inventory $ :foo)))
-    [(cancel-order :bar $) process-order] |   (bind-either (fn [$] (cancel-order :bar $)) (fn [_] process-order))
-    (fulfil-order $))                     |   (bind-either (fn [$] (fulfil-order $))))
-  See:
-    either->
-    either->>
-    maybe-as->
-    trial-as->"
-  [expr name & forms]
-  `(-> ~expr
-     ~@(map #(i/bind-expr 'promenade.core/bind-either (partial i/expand-as-> name) (partial i/expand-as-> name) %)
-         forms)))
-
-
-(defmacro maybe->
-  "Thread-first expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
-  'just' intact.
-  Example usage                           Expanded as
-  -------------                         | -----------
-  (maybe-> (find-order)                 | (-> (find-order)
-    (check-inventory :foo)              |   (bind-maybe (fn [x] (check-inventory x :foo)))
-    [(cancel-order :bar) process-order] |   (bind-maybe (fn [] (cancel-order :bar)) process-order)
-    fulfil-order)                       |   (bind-maybe fulfil-order))
-  See:
-    maybe->>
-    maybe-as->
-    either->
-    trial->"
-  [x & forms]
-  `(-> ~x
-     ~@(map #(i/bind-expr 'promenade.core/bind-maybe i/expand-nothing i/expand-> %)
-         forms)))
-
-
-(defmacro maybe->>
-  "Thread-last expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
-  'just' intact.
-  Example usage                           Expanded as
-  -------------                         | -----------
-  (maybe->> (find-order)                | (-> (find-order)
-    (check-inventory :foo)              |   (bind-maybe (fn [x] (check-inventory :foo x)))
-    [(cancel-order :bar) process-order] |   (bind-maybe (fn [] (cancel-order :bar)) process-order)
-    fulfil-order)                       |   (bind-maybe fulfil-order))
-  See:
-    either->
-    either-as->
-    maybe->>
-    trial->>"
-  [x & forms]
-  `(-> ~x
-     ~@(map #(i/bind-expr 'promenade.core/bind-maybe i/expand-nothing i/expand->> %)
-         forms)))
-
-
-(defmacro maybe-as->
-  "Thread-anywhere expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
-  'just' intact.
-  Example usage                             Expanded as
-  -------------                         | -----------
-  (maybe-as-> (find-order) $            | (-> (find-order)
-    (check-inventory $ :foo)            |   (bind-maybe (fn [$] (check-inventory $ :foo)))
-    [(cancel-order :bar) process-order] |   (bind-maybe (fn [] (cancel-order :bar)) (fn [_] process-order))
-    (fulfil-order $))                   |   (bind-maybe (fn [$] (fulfil-order $))))
-  See:
-    maybe->
-    maybe->>
-    either-as->
-    trial-as->"
-  [expr name & forms]
-  `(-> ~expr
-     ~@(map #(i/bind-expr 'promenade.core/bind-maybe i/expand-nothing (partial i/expand-as-> name) %)
-         forms)))
-
-
-(defmacro trial->
-  "Thread-first expansion using bind-trial. A vector form of one element [x] is applied only to 'thrown' leaving
-  'result' intact.
-  Example usage                           Expanded as
-  -------------                         | -----------
-  (trial-> (place-order)                | (-> (place-order)
-    (check-inventory :foo)              |   (bind-trial (fn [x] (check-inventory x :foo)))
-    [(cancel-order :bar) process-order] |   (bind-trial (fn [x] (cancel-order x :bar)) process-order)
-    fulfil-order)                       |   (bind-trial fulfil-order))
-  See:
-    trial->>
-    trial-as->
-    either->
-    maybe->"
-  [x & forms]
-  `(-> ~x
-     ~@(map #(i/bind-expr 'promenade.core/bind-trial i/expand-> i/expand-> %)
-         forms)))
-
-
-(defmacro trial->>
-  "Thread-last expansion using bind-trial. A vector form of one element [x] is applied only to 'thrown' leaving
-  'result' intact.
-  Example usage                           Expanded as
-  -------------                         | -----------
-  (either->> (place-order)              | (-> (place-order)
-    (check-inventory :foo)              |   (bind-trial (fn [x] (check-inventory :foo x)))
-    [(cancel-order :bar) process-order] |   (bind-trial (fn [x] (cancel-order :bar x)) process-order)
-    fulfil-order)                       |   (bind-trial fulfil-order))
-  See:
-    trial->
-    trial-as->
-    either->>
-    maybe->>"
-  [x & forms]
-  `(-> ~x
-     ~@(map #(i/bind-expr 'promenade.core/bind-trial i/expand->> i/expand->> %)
-         forms)))
-
-
-(defmacro trial-as->
-  "Thread-anywhere expansion using bind-trial. A vector form of one element [x] is applied only to 'thrown' leaving
-  'result' intact.
-  Example usage                             Expanded as
-  -------------                           | -----------
-  (either-as-> (place-order) $            | (-> (place-order)
-    (check-inventory $ :foo)              |   (bind-trial (fn [$] (check-inventory $ :foo)))
-    [(cancel-order :bar $) process-order] |   (bind-trial (fn [$] (cancel-order :bar $)) (fn [_] process-order))
-    (fulfil-order $))                     |   (bind-trial (fn [$] (fulfil-order $))))
-  See:
-    trial->
-    trial->>
-    either-as->
-    maybe-as->"
-  [expr name & forms]
-  `(-> ~expr
-     ~@(map #(i/bind-expr 'promenade.core/bind-trial (partial i/expand-as-> name) (partial i/expand-as-> name) %)
-         forms)))
 
 
 ;; ----- Match binding ----
@@ -578,3 +396,221 @@
                     (if (context-pred result)
                       (reduced result)
                       result))))))
+
+
+(defmacro reduce->
+  "Given a bind function (fn [mval alt-fn val-fn]) -> mval and one or more expressions in thread-first form,
+  reduce over the expressions returning the final result. Use clojure.core/reduced for early termination."
+  [bind expr & forms]
+  (-> (fn [form]
+        (with-meta (if (seq? form)
+                     `(^:once fn* [arg#] (~(first form) arg# ~@(rest form)))
+                     `(^:once fn* [arg#] (~form arg#)))
+          (meta form)))
+    (i/gen-reduce bind expr forms)))
+
+
+(defmacro reduce->>
+  "Given a bind function (fn [mval alt-fn val-fn]) -> mval and one or more expressions in thread-last form,
+  reduce over the expressions returning the final result. Use clojure.core/reduced for early termination."
+  [bind expr & forms]
+  (-> (fn [form]
+        (with-meta (if (seq? form)
+                     `(^:once fn* [arg#] (~@form arg#))
+                     `(^:once fn* [arg#] (~form arg#)))
+          (meta form)))
+    (i/gen-reduce bind expr forms)))
+
+
+(defmacro reduce-as->
+  "Given a bind function (fn [mval alt-fn val-fn]) -> mval, a name to bind and one or more expressions in thread-as
+  form, reduce over the expressions returning the final result. Use clojure.core/reduced for early termination."
+  [bind expr name & forms]
+  (i/expected symbol? "placeholder name to be a symbol" name)
+  (-> (fn [form]
+        (with-meta `(^:once fn* [~name] ~form)
+          (meta form)))
+    (i/gen-reduce bind expr forms)))
+
+
+;; ----- Pipeline macros -----
+
+
+(defmacro either->
+  "Thread-first expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
+  'success' intact. Use clojure.core/reduced for early termination.
+  Example usage
+  -------------
+  (either-> (place-order)
+    (check-inventory :foo)
+    [(cancel-order :bar) process-order]
+    fulfil-order)
+  See:
+    reduce->
+    bind-either
+    either->>
+    either-as->
+    maybe->
+    trial->"
+  [x & forms]
+  `(reduce-> bind-either ~x ~@forms))
+
+
+(defmacro either->>
+  "Thread-last expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
+  'success' intact. Use clojure.core/reduced for early termination.
+  Example usage
+  -------------
+  (either->> (place-order)
+    (check-inventory :foo)
+    [(cancel-order :bar) process-order]
+    fulfil-order)
+  See:
+    reduce->>
+    bind-either
+    either->
+    either-as->
+    maybe->>
+    trial->>"
+  [x & forms]
+  `(reduce->> bind-either ~x ~@forms))
+
+
+(defmacro either-as->
+  "Thread-anywhere expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
+  'success' intact. Use clojure.core/reduced for early termination.
+  Example usage
+  -------------
+  (either-as-> (place-order) $
+    (check-inventory $ :foo)
+    [(cancel-order :bar $) process-order]
+    (fulfil-order $))
+  See:
+    reduce-as->
+    bind-either
+    either->
+    either->>
+    maybe-as->
+    trial-as->"
+  [expr name & forms]
+  `(reduce-as-> bind-either ~expr ~name ~@forms))
+
+
+(defmacro maybe->
+  "Thread-first expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
+  'just' intact. Use clojure.core/reduced for early termination.
+  Example usage
+  -------------
+  (maybe-> (find-order)
+    (check-inventory :foo)
+    [(cancel-order :bar) process-order]
+    fulfil-order)
+  See:
+    reduce->
+    bind-maybe
+    maybe->>
+    maybe-as->
+    either->
+    trial->"
+  [x & forms]
+  `(reduce-> bind-maybe ~x ~@forms))
+
+
+(defmacro maybe->>
+  "Thread-last expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
+  'just' intact. Use clojure.core/reduced for early termination.
+  Example usage
+  -------------
+  (maybe->> (find-order)
+    (check-inventory :foo)
+    [(cancel-order :bar) process-order]
+    fulfil-order)
+  See:
+    reduce->>
+    bind-maybe
+    either->
+    either-as->
+    maybe->>
+    trial->>"
+  [x & forms]
+  `(reduce->> bind-maybe ~x ~@forms))
+
+
+(defmacro maybe-as->
+  "Thread-anywhere expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
+  'just' intact. Use clojure.core/reduced for early termination.
+  Example usage
+  -------------
+  (maybe-as-> (find-order) $
+    (check-inventory $ :foo)
+    [(cancel-order :bar) process-order]
+    (fulfil-order $))
+  See:
+    reduce-as->
+    bind-maybe
+    maybe->
+    maybe->>
+    either-as->
+    trial-as->"
+  [expr name & forms]
+  `(reduce-as-> bind-maybe ~expr ~name ~@forms))
+
+
+(defmacro trial->
+  "Thread-first expansion using bind-trial. A vector form of one element [x] is applied only to 'thrown' leaving
+  'result' intact. Use clojure.core/reduced for early termination.
+  Example usage
+  -------------
+  (trial-> (place-order)
+    (check-inventory :foo)
+    [(cancel-order :bar) process-order]
+    fulfil-order)
+  See:
+    reduce->
+    bind-trial
+    trial->>
+    trial-as->
+    either->
+    maybe->"
+  [x & forms]
+  `(reduce-> bind-trial ~x ~@forms))
+
+
+(defmacro trial->>
+  "Thread-last expansion using bind-trial. A vector form of one element [x] is applied only to 'thrown' leaving
+  'result' intact. Use clojure.core/reduced for early termination.
+  Example usage
+  -------------
+  (either->> (place-order)
+    (check-inventory :foo)
+    [(cancel-order :bar) process-order]
+    fulfil-order)
+  See:
+    reduce->>
+    bind-trial
+    trial->
+    trial-as->
+    either->>
+    maybe->>"
+  [x & forms]
+  `(reduce->> bind-trial ~x ~@forms))
+
+
+(defmacro trial-as->
+  "Thread-anywhere expansion using bind-trial. A vector form of one element [x] is applied only to 'thrown' leaving
+  'result' intact. Use clojure.core/reduced for early termination.
+  Example usage
+  -------------
+  (either-as-> (place-order) $
+    (check-inventory $ :foo)
+    [(cancel-order :bar $) process-order]
+    (fulfil-order $))
+  See:
+    reduce-as->
+    bind-trial
+    trial->
+    trial->>
+    either-as->
+    maybe-as->"
+  [expr name & forms]
+  `(reduce-as-> bind-trial ~expr ~name ~@forms))

@@ -1,4 +1,4 @@
-(defproject promenade "0.6.0"
+(defproject promenade "0.7.0-SNAPSHOT"
   :description "Take program design oddities in stride with Clojure/ClojureScript"
   :url "https://github.com/kumarshantanu/promenade"
   :license {:name "Eclipse Public License"
@@ -7,8 +7,7 @@
   :global-vars {*warn-on-reflection* true
                 *assert* true
                 *unchecked-math* :warn-on-boxed}
-  :profiles {:provided {:dependencies [[org.clojure/clojure "1.7.0"]]
-                        :global-vars {*unchecked-math* :warn-on-boxed}}
+  :profiles {:provided {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :cljs {:plugins   [[lein-cljsbuild "1.1.7"]
                                 [lein-doo "0.1.10"]]
                     :doo       {:build "test"}
@@ -22,10 +21,11 @@
                                                            :pretty-print  true}}}}
                     :prep-tasks [["cljsbuild" "once"]]
                     :hooks      [leiningen.cljsbuild]}
+             :ctn {:dependencies [[org.clojure/tools.nrepl "0.2.13"]]}
              :c07 {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :c08 {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :c09 {:dependencies [[org.clojure/clojure "1.9.0"]]}
-             :c10 {:dependencies [[org.clojure/clojure "1.10.0-alpha6"]]}
+             :c10 {:dependencies [[org.clojure/clojure "1.10.0-beta4"]]}
              :s09 {:dependencies [[org.clojure/clojure "1.9.0"]
                                   [org.clojure/clojurescript "1.9.946"]]}
              :s10 {:dependencies [[org.clojure/clojure "1.9.0"]

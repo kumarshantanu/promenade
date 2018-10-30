@@ -10,6 +10,20 @@
   - Enum
 
 
+## [WIP] 0.7.0 / 2018-October-??
+
+- Add reducing thread macros `reduce->`, `reduce->>`, `reduce-as->`
+  - Support for early termination via `clojure.core/reduced`
+  - Support for custom bind functions
+- [BREAKING CHANGE] Accept `nil` as argument in `bind-maybe` nothing-handler
+  - Consistent with other alt-handlers
+- Base bind thread macros on reducing thread macros
+  - `either->`, `either->>`, `either-as->`
+  - `maybe->`, `maybe->>`, `maybe-as->`
+    - [BREAKING CHANGE] Nothing handler expression must handle the argument
+  - `trial->`, `trial->>`, `trial-as->`
+
+
 ## 0.6.0 / 2018-August-01
 
 - Add `!wrap` macro to wrap functions to return thrown context on exception
