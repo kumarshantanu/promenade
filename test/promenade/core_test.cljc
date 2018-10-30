@@ -275,20 +275,20 @@
           {:foo 1
            :bar 2}
           [exception? (+ 2)]
-          inc)))
+          inc)) "All success, with 2-element vector")
   (is (= false
         (prom/trial-> "foo"
           throwx
           [exception? vector]
-          not)))
+          not)) "Failure and recovery")
   (is (= true
         (prom/trial-> :foo
           throwx
-          [exception?])) "1-element vector applies to the left ('exception' in this case)")
-  (is (= :foo
+          [exception?])) "1-element vector (applies to the left, 'exception' in this case)")
+  (is (= :bar
         (prom/trial-> :foo
-          identity
-          [exception?])) "1-element vector applies to the left ('exception' in this case)"))
+          prom/fail
+          [prom/bind-either (do :bar) {:foo 10}])) "3-element vector (applies to foreign bind, 'failure' here)"))
 
 
 (deftest test-trial->>
@@ -297,24 +297,24 @@
           {:foo 1
            :bar 2}
           [(instance? #?(:clj Exception :cljs js/Error)) (vector 2)]
-          first)))
+          first)) "All success, with 2-element vector")
   (is (= false
         (prom/trial->> :foo
           {:foo 1
            :bar 2}
           throwx
           [(instance? #?(:clj Exception :cljs js/Error)) (vector 2)]
-          not)))
+          not)) "Failure and recovery")
   (is (= true
         (prom/trial->> :foo
           throwx
           [(instance? #?(:clj Exception :cljs js/Error))]))
-    "1-element vector applies to the left ('exception' in this case)")
-  (is (= :foo
+    "1-element vector (applies to the left, 'exception' in this case)")
+  (is (= :bar
         (prom/trial->> :foo
-          identity
-          [(instance? #?(:clj Exception :cljs js/Error))]))
-    "1-element vector applies to the left ('exception' in this case)"))
+          prom/fail
+          [prom/bind-either (or :bar) {:foo 10}]))
+    "3-element vector (applies to foreign bind, 'failure' here)"))
 
 
 (defn get-ex-msg [e]
@@ -328,24 +328,24 @@
           ({:foo 1
             :bar 2} $)
           [(do [2 1]) (vector $ 2)]
-          (first $))))
+          (first $))) "All success, with 2-element vector")
   (is (= "bar-foo"
         (prom/trial-as-> :foo $
           ({:foo 1
             :bar 2} $)
           (throwx "foo")
           [(get-ex-msg $) (vector $ 2)]
-          (str "bar-" $))))
+          (str "bar-" $))) "Failure and recovery")
   (is (= "foo"
         (prom/trial-as-> :foo $
           (throwx (name $))
           [(get-ex-msg $)]))
-    "1-element vector applies to the left ('exception' in this case)")
-  (is (= [:foo]
+    "1-element vector (applies to the left, 'exception' in this case)")
+  (is (= :bar
         (prom/trial-as-> :foo $
-          (vector $)
-          [(get-ex-msg $)]))
-    "1-element vector applies to the left ('exception' in this case)"))
+          (prom/fail $)
+          [prom/bind-either :bar {:foo 10}]))
+    "3-element vector (applies to foreign bind, 'failure' in this case)"))
 
 
 (deftest test-mdo
