@@ -217,10 +217,10 @@ macros that make it look just like the success/error handling case.
 Let us take the contrived use case of fetching some data from a database that is fronted by a cache.
 
 ```clojure
-(prom/maybe-> data-id  ; begin with data-id
-  fetch-from-cache     ; attemp to fetch the data from cache, which may return a value or prom/nothing
-  [(do (fetch-from-db)]; if not found in cache then fetch from DB, which may return a value or prom/nothing
-  decompress)          ; if data was fetched then decompress it before returning to the caller
+(prom/maybe-> data-id           ; begin with data-id
+  fetch-from-cache              ; attemp to fetch the data from cache, which may return a value or prom/nothing
+  [(do (fetch-from-db data-id)] ; if not found in cache then fetch from DB, which may return a value or prom/nothing
+  decompress)                   ; if data was fetched then decompress it before returning to the caller
 ```
 
 Here `maybe->` is a thread-first (like `clojure.core/->`) variant of acting on the result of previous step. A
@@ -294,19 +294,53 @@ For example, the code snippet below enhances upon the use-case we saw in success
 ```clojure
 (-> order-id
   fetch-order-details-from-cache
-  (prom/maybe->   [(do (fetch-order-details-from-db))]) ; only error-handles Nothing. E.g. a cache miss
+  (prom/maybe->   [(do (fetch-order-details-from-db))])    ; only error-handles Nothing. E.g. a cache miss
   (prom/either->  check-inventory)
-  (prom/either->> [(cancel-order order-id) process-order]) ; Either cancel the order due to Failure, or process valid values
-  (prom/either->  [stock-replenish-init]) ; Only if the prior step result was a Failure
-  (prom/either->  fulfil-order)           ; Only if we still have a valid value
-  (prom/maybe->   [(do (not-found-error))]); Handle the possiblity that Nothing flowed through from the fetch
-  (prom/trial->   [generate-error]))      ; Handle any exceptions. Any of the above steps could have returned a Thrown
+  (prom/either->> [(cancel-order order-id) process-order]) ; Cancel order when Failure, or process valid values
+  (prom/either->  [stock-replenish-init])   ; Only if the prior step result was a Failure
+  (prom/either->  fulfil-order)             ; Only if we still have a valid value
+  (prom/maybe->   [(do (not-found-error))]) ; Handle the possibility that Nothing flowed through from the fetch
+  (prom/trial->   [generate-error]))        ; Handle any exceptions. Any above step could have returned a Thrown
 ```
 
 Remember that all of the behind-the-scene bind functions will flow "unknown" context through to the next. Thus it is perfectly
-fine for *any* of the steps above to return whatever kind of context they want. Suppose you're written every one of the
-functions above by wrapping the body with a `(prom/! ...)`. This means that any unexpected exception would naturally flow down
-to the final `trial->` error handler.
+fine for *any* of the steps above to return whatever kind of context they want. Suppose you've written every one of the
+functions above by wrapping the body with a `(prom/! ...)`. This means that any unexpected exception would naturally flow down to the final `trial->` error handler.
+
+### Intermixing bind functions
+
+Starting with version `0.7.0` intermixing bind functions is easily achieved with a 3-element vector form.
+See the above example rewritten using 3-element vector form below:
+
+```clojure
+;; we use either-> here because most steps deal with success/failure
+(prom/either-> order-id
+  fetch-order-details-from-cache
+  [prom/bind-maybe (do (fetch-order-details-from-db order-id)) do] ; only error-handles Nothing. E.g. a cache miss
+  check-inventory
+  [(cancel-order order-id) process-order]      ; Either cancel the order due to Failure, or process valid values
+  [stock-replenish-init]                       ; Only if the prior step result was a Failure
+  fulfil-order                                 ; Only if we still have a valid value
+  [prom/bind-maybe (do (not-found-error)) do]  ; Handle the possibility that Nothing flowed through from the fetch
+  [prom/bind-trial generate-error do])         ; Handle any exceptions. Any above step could have returned a Thrown
+```
+
+### Early termination
+
+Starting with version `0.7.0` the bind operations in _either_, _maybe_ or _trial_ macros are woven together using
+`clojure.core/reduce`, which makes early termination as easy as wrapping the result with `clojure.core/reduced`.
+
+```clojure
+(prom/either-> order-id
+  validate-order-id
+  [(-> validation-error reduced)]  ; will bail out on invalid order-id, rest of the chain is skipped
+  process-order
+  [handle-order-processing-failure])
+```
+
+Early termination may be applied to failure (or any context) handling, and also on regular values at any point
+in the chain.
+
 
 ## Reducing-functions
 
