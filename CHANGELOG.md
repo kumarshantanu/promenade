@@ -10,7 +10,7 @@
   - Enum
 
 
-## [WIP] 0.7.0 / 2018-October-??
+## 0.7.0 / 2018-October-30
 
 - Add reducing thread macros `reduce->`, `reduce->>`, `reduce-as->`
   - Support for early termination via `clojure.core/reduced`
