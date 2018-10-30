@@ -71,6 +71,21 @@
           dec))))
 
 
+(deftest test-reduce->>
+  (is (= 9
+        (prom/reduce->> prom/bind-either
+          :foo      ; begin with :foo
+          {:foo 1
+           :bar 2}  ; lookup in map (success)
+          prom/fail ; turn into failure
+          [do]      ; recover from failure
+          inc       ; success after recovery
+          prom/void ; turn into Nothing (bind-maybe can handle)
+          [prom/bind-maybe (or 10) do] ; recover from foreign bind
+          (/ 90)
+          int))))
+
+
 (deftest test-either->
   (is (= 4
         (prom/either-> :foo
@@ -114,34 +129,6 @@
           [vector])) "1-element vector applies to the left ('failure' in this case)")
   (is (= :foo
         (prom/either->> :foo
-          identity
-          [vector])) "1-element vector applies to the left ('failure' in this case)"))
-
-
-(deftest test-reduce->>bind-either
-  (is (= 2
-        (prom/reduce->> prom/bind-either
-          :foo
-          {:foo 1
-           :bar 2}
-          [(* 0) (vector 2)]
-          first)))
-  (is (= 1
-        (prom/reduce->> prom/bind-either
-          :foo
-          {:foo 1
-           :bar 2}
-          prom/fail
-          [(* 0) (vector 2)]
-          inc)))
-  (is (= [:foo]
-        (prom/reduce->> prom/bind-either
-          :foo
-          prom/fail
-          [vector])) "1-element vector applies to the left ('failure' in this case)")
-  (is (= :foo
-        (prom/reduce->> prom/bind-either
-          :foo
           identity
           [vector])) "1-element vector applies to the left ('failure' in this case)"))
 
@@ -248,34 +235,6 @@
           [(or 4)])) "1-element vector applies to the left ('nothing' in this case)")
   (is (= :foo
         (prom/maybe->> :foo
-          identity
-          [vector])) "1-element vector applies to the left ('nothing' in this case)"))
-
-
-(deftest test-reduce->>bind-maybe
-  (is (= 2
-        (prom/reduce->> prom/bind-maybe
-          :foo
-          {:foo 1
-           :bar 2}
-          [(* 0) (vector 2)]
-          first)))
-  (is (= 1
-        (prom/reduce->> prom/bind-maybe
-          :foo
-          {:foo 1
-           :bar 2}
-          prom/void
-          [(or (* 0)) (vector 2)]
-          inc)))
-  (is (= 4
-        (prom/reduce->> prom/bind-maybe
-          :foo
-          prom/void
-          [(or 4)])) "1-element vector applies to the left ('nothing' in this case)")
-  (is (= :foo
-        (prom/reduce->> prom/bind-maybe
-          :foo
           identity
           [vector])) "1-element vector applies to the left ('nothing' in this case)"))
 
@@ -391,36 +350,6 @@
     "1-element vector applies to the left ('exception' in this case)")
   (is (= :foo
         (prom/trial->> :foo
-          identity
-          [(instance? #?(:clj Exception :cljs js/Error))]))
-    "1-element vector applies to the left ('exception' in this case)"))
-
-
-(deftest test-reduce->>bind-trial
-  (is (= 2
-        (prom/reduce->> prom/bind-trial
-          :foo
-          {:foo 1
-           :bar 2}
-          [(instance? #?(:clj Exception :cljs js/Error)) (vector 2)]
-          first)))
-  (is (= false
-        (prom/reduce->> prom/bind-trial
-          :foo
-          {:foo 1
-           :bar 2}
-          throwx
-          [(instance? #?(:clj Exception :cljs js/Error)) (vector 2)]
-          not)))
-  (is (= true
-        (prom/reduce->> prom/bind-trial
-          :foo
-          throwx
-          [(instance? #?(:clj Exception :cljs js/Error))]))
-    "1-element vector applies to the left ('exception' in this case)")
-  (is (= :foo
-        (prom/reduce->> prom/bind-trial
-          :foo
           identity
           [(instance? #?(:clj Exception :cljs js/Error))]))
     "1-element vector applies to the left ('exception' in this case)"))
