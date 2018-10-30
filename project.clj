@@ -7,8 +7,7 @@
   :global-vars {*warn-on-reflection* true
                 *assert* true
                 *unchecked-math* :warn-on-boxed}
-  :profiles {:provided {:dependencies [[org.clojure/clojure "1.7.0"]]
-                        :global-vars {*unchecked-math* :warn-on-boxed}}
+  :profiles {:provided {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :cljs {:plugins   [[lein-cljsbuild "1.1.7"]
                                 [lein-doo "0.1.10"]]
                     :doo       {:build "test"}
@@ -22,6 +21,7 @@
                                                            :pretty-print  true}}}}
                     :prep-tasks [["cljsbuild" "once"]]
                     :hooks      [leiningen.cljsbuild]}
+             :ctn {:dependencies [[org.clojure/tools.nrepl "0.2.13"]]}
              :c07 {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :c08 {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :c09 {:dependencies [[org.clojure/clojure "1.9.0"]]}
