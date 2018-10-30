@@ -68,7 +68,24 @@
           inc       ; success after recovery
           prom/void ; turn into Nothing (bind-maybe can handle)
           [prom/bind-maybe (do 10) do] ; recover from foreign bind
-          dec))))
+          dec)) "Success, failure recovery and foreign bind recovery")
+  (is (= :fail
+        (prom/reduce-> prom/bind-either
+          :foo                   ; begin with :foo
+          {:foo 1
+           :bar 2}               ; lookup in map (success)
+          prom/fail              ; turn into failure
+          [(do (reduced :fail))] ; abort the chain on failure
+          inc)) "Aborting on failure")
+  (is (= :value
+        (prom/reduce-> prom/bind-either
+          :foo                  ; begin with :foo
+          {:foo 1
+           :bar 2}              ; lookup in map (success)
+          prom/fail             ; turn into failure
+          [do]                  ; recover from failure
+          (do (reduced :value)) ; abort the chain
+          dec)) "Aborting on success"))
 
 
 (deftest test-reduce->>
@@ -83,13 +100,30 @@
           prom/void ; turn into Nothing (bind-maybe can handle)
           [prom/bind-maybe (or 10) do] ; recover from foreign bind
           (/ 90)
-          int))))
+          int)) "Success, failure recovery and foreign bind recovery")
+  (is (= :fail
+        (prom/reduce->> prom/bind-either
+          :foo                   ; begin with :foo
+          {:foo 1
+           :bar 2}               ; lookup in map (success)
+          prom/fail              ; turn into failure
+          [(or (reduced :fail))] ; abort the chain on failure
+          int)) "Aborting on failure")
+  (is (= :value
+        (prom/reduce->> prom/bind-either
+          :foo      ; begin with :foo
+          {:foo 1
+           :bar 2}  ; lookup in map (success)
+          prom/fail ; turn into failure
+          [do]      ; recover from failure
+          (or (reduced :value)) ; abort the chain
+          int)) "Aborting on success"))
 
 
 (deftest test-reduce-as->
   (is (= 9
         (prom/reduce-as-> prom/bind-either
-          :foo $     ; begin with :foo
+          :foo $                 ; begin with :foo
           ({:foo 1
             :bar 2} $)           ; lookup in map (success)
           (prom/fail $)          ; turn into failure
@@ -98,6 +132,23 @@
           (prom/void $)          ; turn into Nothing (bind-maybe can handle)
           [prom/bind-maybe 10 $] ; recover from foreign bind
           (/ 90 $)
+          (int $))))
+  (is (= :fail
+        (prom/reduce-as-> prom/bind-either
+          :foo $                 ; begin with :foo
+          ({:foo 1
+            :bar 2} $)           ; lookup in map (success)
+          (prom/fail $)          ; turn into failure
+          [(reduced :fail)]      ; abort the chain on failure
+          (int $))))
+  (is (= :value
+        (prom/reduce-as-> prom/bind-either
+          :foo $                 ; begin with :foo
+          ({:foo 1
+            :bar 2} $)           ; lookup in map (success)
+          (prom/fail $)          ; turn into failure
+          [$]                    ; recover from failure
+          (reduced :value)       ; abort the chain
           (int $)))))
 
 
