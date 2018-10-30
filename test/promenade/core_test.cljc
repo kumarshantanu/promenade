@@ -63,21 +63,21 @@
           {:foo 1
            :bar 2}
           [(* 0) (+ 2)]
-          inc)))
+          inc)) "All success, with 2-element vector")
   (is (= 60
         (prom/either-> :foo
           prom/fail
           [{:foo 10
             :bar 20} vector]
-          (+ 50))))
+          (+ 50))) "Failure and recovery")
   (is (= :foo
         (prom/either-> :foo
           prom/fail
-          [identity])) "1-element vector applies to the left ('failure' in this case)")
-  (is (= :foo
+          [do])) "1-element vector (applies to the left, 'failure' in this case)")
+  (is (= :bar
         (prom/either-> :foo
-          identity
-          [identity])) "1-element vector applies to the left ('failure' in this case)"))
+          prom/void
+          [prom/bind-maybe (do :bar) {:foo 10}])) "3-element vector (applies to foreign bind, 'maybe' in this case)"))
 
 
 (deftest test-reduce->bind-either
