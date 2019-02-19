@@ -10,7 +10,7 @@
   - Enum
 
 
-## [WIP] 0.7.1 / 2019-February-??
+## 0.7.1 / 2019-February-20
 
 
 - Allow `recur` at the tail position in code body (impacting the following macros)
