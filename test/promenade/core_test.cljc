@@ -407,7 +407,13 @@
   (testing "Match implicit failure"
     (is (= nil (prom/mdo)))
     (is (= (prom/fail :foo) (prom/mdo (prom/fail :foo) (prom/fail :bar) 20)) "context bails out early")
-    (is (= 20 (prom/mdo (prom/mfailure (prom/fail :foo)) 20)) "matching context makes no difference")))
+    (is (= 20 (prom/mdo (prom/mfailure (prom/fail :foo)) 20)) "matching context makes no difference"))
+  (testing "recur at tail position"
+    (loop [coll (range 10)]
+      (when (seq coll)
+        (prom/mdo
+          (first coll)
+          (recur (next coll)))))))
 
 
 (deftest test-mlet

@@ -262,12 +262,14 @@
     `nil
     (let [[expr & more] body]
       (with-meta
-        `(let [val# ~expr]
-           (if (context? val#)
-             val#
-             (if ~(empty? more)
+        (if (and (empty? more) (list? expr) (= 'recur (first expr)))  ; 'recur in tail position?
+          expr
+          `(let [val# ~expr]
+             (if (context? val#)
                val#
-               (mdo ~@more))))
+               (if ~(empty? more)
+                 val#
+                 (mdo ~@more)))))
         (meta expr)))))
 
 
