@@ -1,6 +1,5 @@
 language: clojure
 jdk:
-  - oraclejdk7
   - oraclejdk8
 node_js:
   - "8"

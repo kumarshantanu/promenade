@@ -10,6 +10,15 @@
   - Enum
 
 
+## [WIP] 0.7.1 / 2019-February-??
+
+
+- Allow `recur` at the tail position in code body (impacting the following macros)
+  - `promenade.core/mdo`
+  - `promenade.core/mlet`
+  - `promenade.core/when-mlet`
+
+
 ## 0.7.0 / 2018-October-30
 
 - Add reducing thread macros `reduce->`, `reduce->>`, `reduce-as->`
