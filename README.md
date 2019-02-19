@@ -65,7 +65,7 @@ $ lein do clean, cljs-test  # run tests in ClojureScript using NodeJS
 
 ## License
 
-Copyright © 2017-2018 Shantanu Kumar (kumar.shantanu@gmail.com, shantanu.kumar@concur.com)
+Copyright © 2017-2019 Shantanu Kumar
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
