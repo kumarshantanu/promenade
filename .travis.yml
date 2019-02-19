@@ -1,7 +1,10 @@
 language: clojure
 jdk:
-  - oraclejdk7
+  - openjdk7
   - oraclejdk8
+  - oraclejdk9
+  - openjdk10
+  - openjdk11
 node_js:
   - "8"
 script:
