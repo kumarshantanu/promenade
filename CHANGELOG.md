@@ -10,9 +10,9 @@
   - Enum
 
 
-## [WIP] 0.7.2 / 2019-April-??
+## 0.7.2 / 2019-April-25
 
-- [Todo] Fix buggy handling of context as initial expression in `*->`, `*->>`, `*as->` macros
+- Fix buggy handling of context as initial expression in `*->`, `*->>`, `*as->` macros
 
 
 ## 0.7.1 / 2019-February-20
