@@ -108,11 +108,15 @@
       3 (let [[bind alt-handler val-handler] form]
           `[~bind ~(make-handler alt-handler) ~(make-handler val-handler)])
       (expected "vector containing either 1, 2 or 3 forms" form))
-    `[~bind identity ~(make-handler form)]))
+    `[~bind ~(make-handler form)]))
 
 
 (defn gen-reduce
   [make-handler bind expr forms]
-  `(reduce (fn [accumulator# [bind# alt-handler# val-handler#]]
-             (bind# accumulator# alt-handler# val-handler#))
+  `(reduce (fn [accumulator# forms#]
+             (if (= 2 (count forms#))
+               (let [[bind# val-handler#] forms#]
+                 (bind# accumulator# val-handler#))
+               (let [[bind# alt-handler# val-handler#] forms#]
+                 (bind# accumulator# alt-handler# val-handler#))))
      ~expr [~@(map #(reduce-form-fn make-handler % bind) forms)]))

@@ -175,6 +175,16 @@
           [prom/bind-maybe (do :bar) {:foo 10}])) "3-element vector (applies to foreign bind, 'maybe' in this case)"))
 
 
+(deftest test-failure-init  ; for release 0.7.2
+  (let [x prom/failure]
+    (is (prom/failure? (prom/either-> x
+                         identity)))
+    (is (prom/failure? (prom/either->> x
+                         identity)))
+    (is (prom/failure? (prom/either-as-> x $
+                         (identity $))))))
+
+
 (deftest test-either->>
   (is (= 2
         (prom/either->> :foo
