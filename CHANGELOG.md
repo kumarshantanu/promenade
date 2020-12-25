@@ -12,7 +12,7 @@
 
 ## [WIP] 0.8.0 / 2020-December-??
 
-- [Todo] Add fast, stackless alternative to `ex-info`
+- Add fast, stackless alternative to `ex-info`
   - `promenade.util/se-info`
   - `promenade.util/se-info?`
 - [Todo] Improve handling of exceptions
