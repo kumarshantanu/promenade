@@ -23,16 +23,20 @@
                                                            :pretty-print  true}}}}
                     :prep-tasks [["cljsbuild" "once"]]
                     :hooks      [leiningen.cljsbuild]}
-             :ctn {:dependencies [[org.clojure/tools.nrepl "0.2.13"]]}
-             :c07 {:dependencies [[org.clojure/clojure "1.7.0"]]}
-             :c08 {:dependencies [[org.clojure/clojure "1.8.0"]]}
-             :c09 {:dependencies [[org.clojure/clojure "1.9.0"]]}
-             :c10 {:dependencies [[org.clojure/clojure "1.10.0"]]}
-             :s09 {:dependencies [[org.clojure/clojure "1.9.0"]
-                                  [org.clojure/clojurescript "1.9.946"]]}
-             :s10 {:dependencies [[org.clojure/clojure "1.9.0"]
-                                  [org.clojure/clojurescript "1.10.339"]]}
-             :dln {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}}
+             :ctn  {:dependencies [[org.clojure/tools.nrepl "0.2.13"]]}
+             :c07  {:dependencies [[org.clojure/clojure "1.7.0"]]}
+             :c08  {:dependencies [[org.clojure/clojure "1.8.0"]]}
+             :c09  {:dependencies [[org.clojure/clojure "1.9.0"]]}
+             :c10  {:dependencies [[org.clojure/clojure "1.10.0"]]}
+             :s09  {:dependencies [[org.clojure/clojure "1.9.0"]
+                                   [org.clojure/clojurescript "1.9.946"]]}
+             :s10  {:dependencies [[org.clojure/clojure "1.9.0"]
+                                   [org.clojure/clojurescript "1.10.339"]]}
+             :dln  {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
+             :perf {:dependencies [[citius              "0.2.4"]]
+                    :test-paths ^:replace ["perf"]
+                    :jvm-opts ^:replace ["-server" "-Xms2048m" "-Xmx2048m"]}}
   :aliases {"clj-test"  ["with-profile" "c07:c08:c09:c10" "test"]
-            "cljs-test" ["with-profile" "cljs,s09:cljs,s10" "doo" "node" "once"]}
+            "cljs-test" ["with-profile" "cljs,s09:cljs,s10" "doo" "node" "once"]
+            "perf-test" ["with-profile" "c10,perf" "test"]}
   :deploy-repositories [["releases" {:url "https://clojars.org" :creds :gpg}]])
