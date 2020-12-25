@@ -10,13 +10,25 @@
   - Enum
 
 
+## [WIP] 0.8.0 / 2020-December-??
+
+- [Todo] Add fast, stackless alternative to `ex-info`
+  - `promenade.util/se-info`
+  - `promenade.util/se-info?`
+- [Todo] Improve handling of exceptions
+  - Overload `Throwable` and `js/Error` with `IThrown` and `IDeref`
+  - Do not wrap exception as Thrown if already Thrown
+- [Todo] Add entity definition support
+  - `promenade.util/defentity`
+- [Todo] Cljdoc badge
+
+
 ## 0.7.2 / 2019-April-25
 
 - Fix buggy handling of context as initial expression in `*->`, `*->>`, `*as->` macros
 
 
 ## 0.7.1 / 2019-February-20
-
 
 - Allow `recur` at the tail position in code body (impacting the following macros)
   - `promenade.core/mdo`
