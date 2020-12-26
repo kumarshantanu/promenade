@@ -1,8 +1,14 @@
+dist: bionic
 language: clojure
 jdk:
-  - oraclejdk8
+  - openjdk8
+  - openjdk10
+  - openjdk11
 node_js:
   - "8"
 script:
   - lein do clean, clj-test
   - lein do clean, cljs-test
+cache:
+  directories:
+  - $HOME/.m2
