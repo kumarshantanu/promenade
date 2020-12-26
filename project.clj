@@ -37,6 +37,6 @@
                     :test-paths ^:replace ["perf"]
                     :jvm-opts ^:replace ["-server" "-Xms2048m" "-Xmx2048m"]}}
   :aliases {"clj-test"  ["with-profile" "c07:c08:c09:c10" "test"]
-            "cljs-test" ["with-profile" "cljs,s09:cljs,s10" "doo" "node" "once"]
+            "cljs-test" ["with-profile" "cljs,s10" "doo" "node" "once"]
             "perf-test" ["with-profile" "c10,perf" "test"]}
   :deploy-repositories [["releases" {:url "https://clojars.org" :creds :gpg}]])

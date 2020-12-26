@@ -12,6 +12,8 @@
 
 ## [WIP] 0.8.0 / 2020-December-??
 
+- [BREAKING CHANGE] Drop support for ClojureScript 1.9
+  - Due to `javax.xml.bind.DatatypeConverter` exceptions with Java 9+
 - Add fast, stackless alternative to `ex-info`
   - `promenade.util/se-info`
   - `promenade.util/se-info?`
