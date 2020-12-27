@@ -10,7 +10,7 @@
 (ns promenade.perf-test
   (:import
     [clojure.lang ExceptionInfo]
-    [promenade.jvm StacklessExceptionInfo])
+    [promenade.util StacklessExceptionInfo])
   (:require
     [clojure.test :refer [deftest is testing use-fixtures]]
     [promenade.core :as prom]

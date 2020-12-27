@@ -14,7 +14,7 @@
     #?(:cljs [promenade.core :as prom :include-macros true]
         :clj [promenade.core :as prom]))
   #?(:clj (:import
-            [promenade.jvm StacklessExceptionInfo])))
+            [promenade.util StacklessExceptionInfo])))
 
 
 #?(:cljs
@@ -33,12 +33,12 @@
 (defn se-info
   "Like `clojure.core/ex-info`, but with the following differences:
 
-  | `promenade.util/se-info`                    | `clojure.core/ex-info`, `cljs.core/ex-info` |
-  |---------------------------------------------|---------------------------------------------|
-  | no stack trace or cause support             | full support for stack trace and cause      |
-  | much faster and lightweight                 | same cost model as regular exceptions       |
-  | meant for flow control, not debugging       | meant for debugging and flow control        |
-  | uses `promenade.jvm.StacklessExceptionInfo` | uses `clojure.lang.ExceptionInfo`           |
+  | `promenade.util/se-info`                     | `clojure.core/ex-info`, `cljs.core/ex-info` |
+  |----------------------------------------------|---------------------------------------------|
+  | no stack trace or cause support              | full support for stack trace and cause      |
+  | much faster and lightweight                  | same cost model as regular exceptions       |
+  | meant for flow control, not debugging        | meant for debugging and flow control        |
+  | uses `promenade.util.StacklessExceptionInfo` | uses `clojure.lang.ExceptionInfo`           |
 
   You may use `clojure.core/ex-data` or `cljs.core/ex-data` on this exception.
   See: [[se-info?]], [[!se-info]]"

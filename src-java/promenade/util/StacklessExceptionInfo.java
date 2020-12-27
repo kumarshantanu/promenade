@@ -8,7 +8,7 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-package promenade.jvm;
+package promenade.util;
 
 import clojure.lang.IExceptionInfo;
 import clojure.lang.IPersistentMap;

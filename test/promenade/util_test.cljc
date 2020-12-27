@@ -17,7 +17,7 @@
         :clj [promenade.util :as prut]))
   #?(:clj (:import
             [clojure.lang IExceptionInfo]
-            [promenade.jvm StacklessExceptionInfo])))
+            [promenade.util StacklessExceptionInfo])))
 
 
 (deftest test-se-info

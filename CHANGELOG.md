@@ -23,6 +23,7 @@
   - Overload `Throwable` (CLJ) and `js/Error` (CLJS) with `IThrown` and `IHolder`
   - Do not wrap exception as `Thrown` if already a `Thrown` (true in most cases)
 - Add fast, stackless alternative to `ex-info`
+  - Add Java class and CLJS type `promenade.util.StacklessExceptionInfo`
   - `promenade.util/se-info`
   - `promenade.util/se-info?`
 - [Todo] Add entity definition support
