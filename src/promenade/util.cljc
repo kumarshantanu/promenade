@@ -34,22 +34,24 @@
 (defn se-info
   "Like `clojure.core/ex-info`, but with the following differences:
 
-  | `promenade.util/se-info`                     | `clojure.core/ex-info`, `cljs.core/ex-info` |
-  |----------------------------------------------|---------------------------------------------|
-  | no stack trace or cause support              | full support for stack trace and cause      |
-  | much faster and lightweight                  | same cost model as regular exceptions       |
-  | meant for flow control, not debugging        | meant for debugging and flow control        |
-  | uses `promenade.util.StacklessExceptionInfo` | uses `clojure.lang.ExceptionInfo`           |
+  | `promenade.util/se-info`                     | `clojure.core/ex-info`, `cljs.core/ex-info`   |
+  |----------------------------------------------|-----------------------------------------------|
+  | no stack trace or cause support              | full support for stack trace and cause        |
+  | much faster and lightweight                  | same cost model as regular exceptions         |
+  | meant for flow control, not debugging        | meant for debugging and flow control          |
+  | uses `promenade.util.StacklessExceptionInfo` | uses `(clojure.lang|cljs.core).ExceptionInfo` |
 
-  You may use `clojure.core/ex-data` or `cljs.core/ex-data` on this exception.
-  See: [[se-info?]], [[!se-info]]"
+  You may use `clojure.core/ex-data` or `cljs.core/ex-data` on this exception to retrieve the data.
+
+  See: [[se-info?]], [[!se-info]], [[!wrap-se-info]]"
   ([msg] (StacklessExceptionInfo. msg {}))
   ([msg data] (StacklessExceptionInfo. msg data)))
 
 
 (defn se-info?
   "Return `true` if argument is an instance of `StacklessExceptionInfo`, `false` otherwise.
-  See: [[se-info]]"
+
+  See: [[se-info]], [[!se-info]], [[!wrap-se-info]]"
   [x]
   #?(:cljs (and (instance? StacklessExceptionInfo x)
              (nil? (.-stack x)))
@@ -59,7 +61,8 @@
 (defmacro !se-info
   "Evaluate given form and return the result; on `promenade.util.StacklessExceptionInfo` return the exception as a
   thrown context.
-  See: [[promenade.core/!]]"
+
+  See: [[promenade.core/!]], [[se-info]], [[se-info?]], [[!wrap-se-info]]"
   [expr]
   (let [se-sym (gensym "se-")]
     `(try ~expr
@@ -78,7 +81,9 @@
 (defmacro !wrap-se-info
   "Wrap given function such that on `promenade.util.StacklessExceptionInfo` it returns the exception as a thrown
   context.
-  See: [[promenade.core/!wrap]]"
+
+  See: [[promenade.core/!wrap]], [[se-info]], [[se-info?]], [[!se-info]]"
   [f]
+  ;; NOTE: This could be a function instead of a macro, but the function doesn't work in CLJS
   `(fn [& args#]
      (!se-info (apply ~f args#))))
