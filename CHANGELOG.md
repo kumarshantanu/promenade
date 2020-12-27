@@ -14,15 +14,22 @@
 
 - [BREAKING CHANGE] Drop support for ClojureScript 1.9
   - Due to `javax.xml.bind.DatatypeConverter` exceptions with Java 9+
+- [BREAKING CHANGE] Contexts holding value (e.g. failure and thrown) must implement `promenade.type/IHolder`
+  - New protocol `promenade.type/IHolder` is introduced
+    - To hold a value, as a substitute for `IDeref`
+    - Because `clojure.lang.IDeref` is a Java interface - cannot be extended to `java.lang.Throwable`
+  - Built-in failure and thrown implementations are updated to implement `promenade.type/IHolder`
+- [Todo] Optimize exception handling by avoiding unwanted wrapping/unwrapping
+  - Overload `Throwable` (CLJ) and `js/Error` (CLJS) with `IThrown` and `IHolder`
+  - Do not wrap exception as `Thrown` if already a `Thrown` (true in most cases)
 - Add fast, stackless alternative to `ex-info`
   - `promenade.util/se-info`
   - `promenade.util/se-info?`
-- [Todo] Improve handling of exceptions
-  - Overload `Throwable` and `js/Error` with `IThrown` and `IDeref`
-  - Do not wrap exception as Thrown if already Thrown
 - [Todo] Add entity definition support
   - `promenade.util/defentity`
-- [Todo] Cljdoc badge
+- [Todo] Documentation
+  - Formatting for Cljdoc
+  - Add Cljdoc badge
 
 
 ## 0.7.2 / 2019-April-25

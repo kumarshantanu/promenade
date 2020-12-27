@@ -8,6 +8,7 @@
 
 
 (ns promenade.internal
+  "Internal implementation details of Promenade - likely to break across versions."
   (:require
     #?(:clj [clojure.pprint :as pp])
     [promenade.type :as t])
@@ -32,12 +33,17 @@
       :clj (instance? IDeref x)))
 
 
+(defn holder? [x]
+  (satisfies? t/IHolder x))
+
+
 ;; ----- context implementation -----
 
 
 (defrecord Failure [failure]
   t/IContext
   IDeref (#?(:clj deref :cljs -deref) [_] failure)
+  t/IHolder (-obtain [_] failure)
   t/IFailure)
 
 
@@ -49,6 +55,7 @@
 (defrecord Thrown  [thrown]
   t/IContext
   IDeref (#?(:clj deref :cljs -deref) [_] thrown)
+  t/IHolder (-obtain [_] thrown)
   t/IThrown)
 
 

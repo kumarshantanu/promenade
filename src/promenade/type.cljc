@@ -13,6 +13,10 @@
 (defprotocol IContext "Marker protocol for all context types")
 
 
-(defprotocol IFailure "Marker protocol for failure - to be implemented with IDeref")
+(defprotocol IFailure "Marker protocol for failure - to be implemented with IHolder")
 (defprotocol INothing "Marker protocol for nothing")
-(defprotocol IThrown  "Marker protocol for thrown - to be implemented with IDeref")
+(defprotocol IThrown  "Marker protocol for thrown - to be implemented with IHolder")
+
+
+(defprotocol IHolder
+  (-obtain [_] "Obtain the held item"))

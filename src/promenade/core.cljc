@@ -118,14 +118,16 @@
 (defn deref-context
   "Deref argument if it is a context, return as it is otherwise."
   ([x] (if (context? x)
-         (if (i/derefable? x)
-           (deref x)
-           (throw (ex-info "Context does not support deref" {:context x})))
+         (cond
+           (i/holder? x)    (t/-obtain x)
+           (i/derefable? x) (deref x)
+           :else            (throw (ex-info "Context does not support promenade.type/IHolder or deref" {:context x})))
          x))
   ([x default] (if (context? x)
-                 (if (i/derefable? x)
-                   (deref x)
-                   default)
+                 (cond
+                   (i/holder? x)    (t/-obtain x)
+                   (i/derefable? x) (deref x)
+                   :else            default)
                  x)))
 
 
@@ -159,7 +161,7 @@
                       mval
                       (success-f mval)))
   ([mval failure-f success-f] (cond
-                                (failure? mval) (failure-f (deref mval))
+                                (failure? mval) (failure-f (t/-obtain mval))
                                 (context? mval) mval
                                 :otherwise      (success-f mval))))
 
@@ -193,7 +195,7 @@
                      mval
                      (result-f mval)))
   ([mval thrown-f result-f] (cond
-                              (thrown? mval)  (thrown-f (deref mval))
+                              (thrown? mval)  (thrown-f (t/-obtain mval))
                               (context? mval) mval
                               :otherwise      (result-f mval))))
 
@@ -212,7 +214,7 @@
     cond-mlet"
   ([x]
     (if (failure? x)
-      (i/->Match true (deref x))
+      (i/->Match true (t/-obtain x))
       (i/->Match false x)))
   ([x default]
     (if (failure? x)
@@ -246,7 +248,7 @@
     cond-mlet"
   ([x]
     (if (thrown? x)
-      (i/->Match true (deref x))
+      (i/->Match true (t/-obtain x))
       (i/->Match false x)))
   ([x default]
     (if (thrown? x)
