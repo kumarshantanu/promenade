@@ -26,6 +26,8 @@
   - Add Java class and CLJS type `promenade.util.StacklessExceptionInfo`
   - `promenade.util/se-info`
   - `promenade.util/se-info?`
+  - `promenade.util/!se-info`
+  - `promenade.util/!wrap-se-info`
 - [Todo] Add entity definition support
   - `promenade.util/defentity`
 - [Todo] Documentation

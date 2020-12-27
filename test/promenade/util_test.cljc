@@ -16,17 +16,19 @@
     #?(:cljs [promenade.util :as prut :include-macros true :refer [StacklessExceptionInfo]]
         :clj [promenade.util :as prut]))
   #?(:clj (:import
-            [clojure.lang IExceptionInfo]
+            [clojure.lang ExceptionInfo IExceptionInfo]
             [promenade.util StacklessExceptionInfo])))
 
 
 (deftest test-se-info
   (let [se-1 (prut/se-info "foo")
-        se-2 (prut/se-info "foo" {:foo 10})]
+        se-2 (prut/se-info "foo" {:foo 10})
+        ex-1 (ex-info "foo" {})]
     (testing
       "instance check"
       (is (prut/se-info? se-1))
-      (is (prut/se-info? se-2)))
+      (is (prut/se-info? se-2))
+      (is (not (prut/se-info? ex-1))))
     (testing
       "underlying cause"
       (is (nil? (#?(:cljs .-cause
@@ -64,3 +66,28 @@
               (throw (prut/se-info "test"))
               (catch StacklessExceptionInfo e
                 :foo)))))))
+
+
+(deftest test-!se-info
+  (let [se-1 (prut/se-info "test")
+        ex-1 (ex-info "other" {})
+        f (fn [] :foo)
+        g (fn [] (throw se-1))
+        h (fn [] (throw ex-1))]
+    (is (= :foo (prut/!se-info (f))) "returned value")
+    (is (= se-1 (prut/!se-info (g))) "returned StacklessExceptionInfo")
+    (is (thrown? ExceptionInfo (prut/!se-info (h)))  "thrown ExceptionInfo")))
+
+
+(deftest test-!wrap-se-info
+  (let [se-1 (prut/se-info "test")
+        ex-1 (ex-info "other" {})
+        f (fn [] :foo)
+        g (fn [] (throw se-1))
+        h (fn [] (throw ex-1))
+        f-wrapped (prut/!wrap-se-info f)
+        g-wrapped (prut/!wrap-se-info g)
+        h-wrapped (prut/!wrap-se-info h)]
+    (is (= :foo (f-wrapped)) "returned value")
+    (is (= se-1 (g-wrapped)) "returned StacklessExceptionInfo")
+    (is (thrown? ExceptionInfo (h-wrapped)) "thrown ExceptionInfo")))

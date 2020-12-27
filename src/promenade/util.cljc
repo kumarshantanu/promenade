@@ -14,6 +14,7 @@
     #?(:cljs [promenade.core :as prom :include-macros true]
         :clj [promenade.core :as prom]))
   #?(:clj (:import
+            [clojure.lang ExceptionInfo]
             [promenade.util StacklessExceptionInfo])))
 
 
@@ -50,4 +51,34 @@
   "Return `true` if argument is an instance of `StacklessExceptionInfo`, `false` otherwise.
   See: [[se-info]]"
   [x]
-  (instance? StacklessExceptionInfo x))
+  #?(:cljs (and (instance? StacklessExceptionInfo x)
+             (nil? (.-stack x)))
+      :clj (instance? StacklessExceptionInfo x)))
+
+
+(defmacro !se-info
+  "Evaluate given form and return the result; on `promenade.util.StacklessExceptionInfo` return the exception as a
+  thrown context.
+  See: [[promenade.core/!]]"
+  [expr]
+  (let [se-sym (gensym "se-")]
+    `(try ~expr
+       (catch promenade.util.StacklessExceptionInfo ~se-sym
+         ;; In CLJS `defmacro` is called by ClojureJVM, hence reader conditionals always choose :clj -
+         ;; so we discover the environment using a hack (:ns &env), which returns truthy for CLJS.
+         ;; Reference: https://groups.google.com/forum/#!topic/clojure/DvIxYnO1QLQ
+         ;; Reference: https://dev.clojure.org/jira/browse/CLJ-1750
+         ~(if (:ns &env)
+            `(if (se-info? ~se-sym)
+               ~se-sym
+               (throw ~se-sym))
+            se-sym)))))
+
+
+(defmacro !wrap-se-info
+  "Wrap given function such that on `promenade.util.StacklessExceptionInfo` it returns the exception as a thrown
+  context.
+  See: [[promenade.core/!wrap]]"
+  [f]
+  `(fn [& args#]
+     (!se-info (apply ~f args#))))
