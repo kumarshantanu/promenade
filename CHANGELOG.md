@@ -19,7 +19,7 @@
     - To hold a value, as a substitute for `IDeref`
     - Because `clojure.lang.IDeref` is a Java interface - cannot be extended to `java.lang.Throwable`
   - Built-in failure and thrown implementations are updated to implement `promenade.type/IHolder`
-- [Todo] Optimize exception handling by avoiding unwanted wrapping/unwrapping
+- Optimize exception handling by avoiding unwanted wrapping/unwrapping
   - Overload `Throwable` (CLJ) and `js/Error` (CLJS) with `IThrown` and `IHolder`
   - Do not wrap exception as `Thrown` if already a `Thrown` (true in most cases)
 - Add fast, stackless alternative to `ex-info`

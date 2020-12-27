@@ -92,7 +92,10 @@
     `(! ~(if (:ns &env) `js/Error `Exception) ~x))
   ([catch-class x] (let [catch-expr    (fn [clazz]
                                          (i/expected symbol? "exception class name" clazz)
-                                         `(catch ~clazz ex# (i/->Thrown ex#)))
+                                         `(catch ~clazz ex#
+                                            (if (thrown? ex#)
+                                              ex#
+                                              (i/->Thrown ex#))))
                          catch-clauses (cond
                                          (symbol? catch-class) [(catch-expr catch-class)]
                                          (vector? catch-class) (map catch-expr catch-class)

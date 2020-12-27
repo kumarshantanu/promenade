@@ -70,6 +70,17 @@
 #?(:clj (defmethod pp/simple-dispatch Thrown  [x] ((get-method pp/simple-dispatch IRecord) x)))
 
 
+;; Overload `java.lang.Throwable` (CLJ) and `js/Error` (CLJS) as `promenade.type/IThrown` so as to avoid wrapping
+;; and unwrapping of exceptions by `promenade.core/!` and `promenade.core/deref-context`. However, the caveat is,
+;; one can no more distinguish between thrown exceptions versus exceptions returned by functions (which is rare)
+;; in all Promenade binding context.
+(extend-type #?(:cljs js/Error
+                 :clj Throwable)
+  t/IContext
+  t/IHolder (-obtain [this] this)
+  t/IThrown)
+
+
 ;; ----- context matching support -----
 
 
