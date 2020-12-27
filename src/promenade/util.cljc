@@ -21,6 +21,8 @@
 #?(:cljs
     (defn ^{:jsdoc ["@constructor"]}
           StacklessExceptionInfo [message data]
+      (when (nil? data)
+        (throw (js/Error. "Additional data must be non-nil")))
       (this-as this
         (set! (.-message this) message)
         (set! (.-data this) data)

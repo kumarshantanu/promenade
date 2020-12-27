@@ -25,6 +25,11 @@
         se-2 (prut/se-info "foo" {:foo 10})
         ex-1 (ex-info "foo" {})]
     (testing
+      "construction failure"
+      (is (thrown? #?(:cljs js/Error
+                       :clj IllegalArgumentException)
+            (prut/se-info "test" nil)) "se-info with nil data"))
+    (testing
       "instance check"
       (is (prut/se-info? se-1))
       (is (prut/se-info? se-2))
