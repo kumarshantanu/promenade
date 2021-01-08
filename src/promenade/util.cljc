@@ -12,9 +12,10 @@
   #?(:cljs (:require-macros promenade.util))
   (:require
     #?(:cljs [promenade.core :as prom :include-macros true]
-        :clj [promenade.core :as prom]))
+        :clj [promenade.core :as prom])
+    [promenade.type :as prot])
   #?(:clj (:import
-            [clojure.lang ExceptionInfo]
+            [clojure.lang ExceptionInfo IDeref]
             [promenade.util StacklessExceptionInfo])))
 
 
@@ -89,3 +90,37 @@
   ;; NOTE: This could be a function instead of a macro, but the function doesn't work in CLJS
   `(fn [& args#]
      (!se-info (apply ~f args#))))
+
+
+(defmacro defentity
+  "Define entity record and corresponding instance type predicate function. If fields are unspecified, assume single
+  field `value`.
+  Examples:
+  ```
+  (defentity ProductCode)  ; create record ProductCode with single field 'value', and predicate fn ProductCode?
+  (defentity Approval [by when])  ; create record Approval with fields `by` and `when`, and predicate Approval?
+  ```
+  See: [[defailure]]"
+  ([the-name]
+    `(defentity ~the-name [~'value]))
+  ([the-name fields & more]
+    `(let [klass# (defrecord ~the-name ~fields ~@more)]
+       ;; define predicate
+       (defn ~(symbol (str the-name "?"))
+         ~(str "Return `true` if argument is an instance of " the-name ", `false` otherwise.")
+         [x#]
+         (instance? klass# x#))
+       ;; return what defrecord returned
+       klass#)))
+
+
+(defmacro defailure
+  "Define a failure entity and corresponding instance type predicate function."
+  [the-name fields & more]
+  (let [deref-sym (if (:ns &env) '-deref 'deref)]
+    `(defentity ~the-name ~fields
+       prot/IContext
+       prot/IFailure
+       ~(if (:ns &env) 'IDeref 'clojure.lang.IDeref) (~deref-sym [this#] this#)
+       prot/IHolder (prot/-obtain [this#] this#)
+       ~@more)))

@@ -14,7 +14,8 @@
     #?(:cljs [promenade.core :as prom :include-macros true]
         :clj [promenade.core :as prom])
     #?(:cljs [promenade.util :as prut :include-macros true :refer [StacklessExceptionInfo]]
-        :clj [promenade.util :as prut]))
+        :clj [promenade.util :as prut])
+    [promenade.type :as prot])
   #?(:clj (:import
             [clojure.lang ExceptionInfo IExceptionInfo]
             [promenade.util StacklessExceptionInfo])))
@@ -96,3 +97,29 @@
     (is (= :foo (f-wrapped)) "returned value")
     (is (= se-1 (g-wrapped)) "returned StacklessExceptionInfo")
     (is (thrown? ExceptionInfo (h-wrapped)) "thrown ExceptionInfo")))
+
+
+(prut/defentity Amount)
+(prut/defentity User [id
+                      active?])
+
+
+(deftest test-defentity
+  (let [a1 (->Amount 10)
+        u1 (->User "u123" true)]
+    (is (Amount? a1))
+    (is (= 10 (:value a1)))
+    (is (User? u1))
+    (is (= "u123" (:id u1)))
+    (is (true? (:active? u1)))))
+
+
+(prut/defailure Undelivered [order-id attempts])
+
+
+(deftest test-defailure
+  (let [f1 (->Undelivered "x123" 3)]
+    (is (Undelivered? f1))
+    (is (prom/failure? f1))
+    (is (= f1 @f1))
+    (is (satisfies? prot/IHolder f1))))

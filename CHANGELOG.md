@@ -28,8 +28,9 @@
   - `promenade.util/se-info?`
   - `promenade.util/!se-info`
   - `promenade.util/!wrap-se-info`
-- [Todo] Add entity definition support
+- Add custom entity and failure definition support
   - `promenade.util/defentity`
+  - `promenade.util/defailure`
 - [Todo] Documentation
   - Formatting for Cljdoc
   - Add Cljdoc badge
