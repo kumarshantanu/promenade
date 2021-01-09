@@ -1,4 +1,4 @@
-(defproject promenade "0.8.0-SNAPSHOT"
+(defproject promenade "0.8.0-alpha1"
   :description "Take program design oddities in stride with Clojure/ClojureScript"
   :url "https://github.com/kumarshantanu/promenade"
   :license {:name "Eclipse Public License"

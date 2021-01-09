@@ -10,7 +10,7 @@
   - Enum
 
 
-## [WIP] 0.8.0 / 2020-December-??
+## 0.8.0-alpha1 / 2021-January-09
 
 - [BREAKING CHANGE] Drop support for ClojureScript 1.9
   - Due to `javax.xml.bind.DatatypeConverter` exceptions with Java 9+
@@ -32,8 +32,8 @@
   - `promenade.util/defentity`
   - `promenade.util/defailure`
 - [Todo] Documentation
-  - Formatting for Cljdoc
-  - Add Cljdoc badge
+  - [Todo] Formatting for Cljdoc
+  - [Todo] Add Cljdoc badge
 
 
 ## 0.7.2 / 2019-April-25
