@@ -18,7 +18,7 @@
 
 - [Idea] Make `promenade.util.StacklessExceptionInfo` a subclass of `ExceptionInfo` on the JVM? (already so in CLJS)
 - [Todo] Documentation
-  - [Todo] Documentation for 0.8.0
+  - Add documentation for 0.8.0
   - [Todo] Docstring cross-reference for 0.8.0
   - [Todo] Formatting for Cljdoc
   - [Todo] Add Cljdoc badge
