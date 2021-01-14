@@ -17,11 +17,11 @@
 ## [WIP] 0.8.0 / 2021-January-??
 
 - [Idea] Make `promenade.util.StacklessExceptionInfo` a subclass of `ExceptionInfo` on the JVM? (already so in CLJS)
-- [Todo] Documentation
+- Documentation
   - Add documentation for 0.8.0
   - Docstring cross-reference
   - Formatting for Cljdoc
-  - [Todo] Add Cljdoc badge
+  - Add Cljdoc badge
 
 
 ## 0.8.0-alpha1 / 2021-January-09

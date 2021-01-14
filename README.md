@@ -1,6 +1,7 @@
 # promenade
 
 [![Build Status](https://travis-ci.org/kumarshantanu/promenade.svg)](https://travis-ci.org/kumarshantanu/promenade)
+[![cljdoc badge](https://cljdoc.org/badge/promenade/promenade)](https://cljdoc.org/d/promenade/promenade)
 
 Take program design oddities in stride with Clojure/ClojureScript.
 
