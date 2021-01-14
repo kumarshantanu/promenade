@@ -14,7 +14,7 @@
   - [Idea] Bulkheads / semaphores
 
 
-## [WIP] 0.8.0 / 2021-January-??
+## 0.8.0-alpha2 / 2021-January-14
 
 - [Idea] Make `promenade.util.StacklessExceptionInfo` a subclass of `ExceptionInfo` on the JVM? (already so in CLJS)
 - Documentation
