@@ -8,6 +8,20 @@
   - Range (pattern match on range groups)
 - [Todo] Utility abstractions (as value or context)
   - Enum
+- [Idea] Resilience primitives
+  - [Idea] Retries - doable via fallbacks
+  - [Idea] Circuit breakers
+  - [Idea] Bulkheads / semaphores
+
+
+## [WIP] 0.8.0 / 2021-January-??
+
+- [Idea] Make `promenade.util.StacklessExceptionInfo` a subclass of `ExceptionInfo` on the JVM? (already so in CLJS)
+- [Todo] Documentation
+  - [Todo] Documentation for 0.8.0
+  - [Todo] Docstring cross-reference for 0.8.0
+  - [Todo] Formatting for Cljdoc
+  - [Todo] Add Cljdoc badge
 
 
 ## 0.8.0-alpha1 / 2021-January-09
