@@ -27,7 +27,7 @@
              :c07  {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :c08  {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :c09  {:dependencies [[org.clojure/clojure "1.9.0"]]}
-             :c10  {:dependencies [[org.clojure/clojure "1.10.2-rc2"]]}
+             :c10  {:dependencies [[org.clojure/clojure "1.10.2-rc3"]]}
              :s09  {:dependencies [[org.clojure/clojure "1.9.0"]
                                    [org.clojure/clojurescript "1.9.946"]]}
              :s10  {:dependencies [[org.clojure/clojure "1.9.0"]
