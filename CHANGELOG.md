@@ -14,6 +14,13 @@
   - [Idea] Bulkheads / semaphores
 
 
+## [WIP] 0.8.0 / 2021-January-??
+
+- [Todo] Make `se-info` a drop-in replacement for `ex-info`
+  - [Todo] Make `promenade.util.StacklessExceptionInfo` a subclass of `ExceptionInfo` on the JVM (already so in CLJS)
+  - [Todo] Update documentation
+
+
 ## 0.8.0-alpha2 / 2021-January-14
 
 - [Idea] Make `promenade.util.StacklessExceptionInfo` a subclass of `ExceptionInfo` on the JVM? (already so in CLJS)
