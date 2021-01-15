@@ -35,7 +35,7 @@
              :dln  {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
              :perf {:dependencies [[citius              "0.2.4"]]
                     :test-paths ^:replace ["perf"]
-                    :jvm-opts ^:replace ["-server" "-Xms2048m" "-Xmx2048m"]}}
+                    :jvm-opts ^:replace ["-server" "-Xms2048m" "-Xmx2048m" "-XX:-OmitStackTraceInFastThrow"]}}
   :aliases {"clj-test"  ["with-profile" "c07:c08:c09:c10" "test"]
             "cljs-test" ["with-profile" "cljs,s10" "doo" "node" "once"]
             "perf-test" ["with-profile" "c10,perf" "test"]}
