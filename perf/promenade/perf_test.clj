@@ -20,9 +20,12 @@
 
 (use-fixtures :once
   (c/make-bench-wrapper
-    ["se-info" "ex-info" "prom/fail"]
+    ["se-info" "ex-info" "prom/fail" "prut/defailure"]
     {:chart-title "se-info/ex-info/prom-fail"
      :chart-filename (format "bench-clj-%s.png" c/clojure-version-str)}))
+
+
+(prut/defailure AFailure [msg foo])
 
 
 (deftest test-generation
@@ -30,7 +33,8 @@
     (prut/se-info "foo" {:foo 10})
     (ex-info      "foo" {:foo 10})
     (prom/fail    {:msg "foo"
-                   :foo 10})))
+                   :foo 10})
+    (->AFailure "foo" 10)))
 
 
 (deftest test-throw-catch
@@ -38,9 +42,11 @@
         ex (ex-info      "foo" {:foo 10})
         pf (prom/fail    {:msg "foo"
                           :foo 10})
+        df (->AFailure "foo" 10)
         se-f (fn [] (throw se))
         ex-f (fn [] (throw ex))
-        pf-f (fn [] pf)]
+        pf-f (fn [] pf)
+        df-f (fn [] df)]
     (c/compare-perf "throw/catch exception"
       (try
         (se-f)
@@ -50,4 +56,5 @@
         (ex-f)
         (catch ExceptionInfo x
           x))
-      (pf-f))))
+      (pf-f)
+      (df-f))))

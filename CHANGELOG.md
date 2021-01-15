@@ -19,6 +19,7 @@
 - Make `se-info` a drop-in replacement for `ex-info`
   - Make `promenade.util.StacklessExceptionInfo` a subclass of `ExceptionInfo` on the JVM (already so in CLJS)
   - Update documentation
+- Add failure entities (`defailure`) to perf test
 
 
 ## 0.8.0-alpha2 / 2021-January-14
