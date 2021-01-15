@@ -487,13 +487,19 @@ support for fast stackless exception in version `0.8.0` for communicating such e
 ```
 
 This is modeled after Clojure's `ex-info`, and is compatible with `ex-data` and (Clojure 1.10) `ex-message` functions.
+In fact, `se-info` is a drop-in replacement for `ex-info` (`promenade.util.StacklessExceptionInfo` is a sub-class of
+`ExceptionInfo`) and catching `ExceptionInfo` also catches `promenade.util.StacklessExceptionInfo` instances.
 
-### Caveats
+### Using `se-info` with `promenade.core`
 
-Due to platform quirks there is a difference in catching a stackless exception (instance of
-`promenade.util.StacklessExceptionInfo`) created with `se-info`:
-- on the JVM it descends from `RuntimeException`, which means catching `ExceptionInfo` will not catch stackless ones
-- in CLJS it descends from `ExceptionInfo`, which means catching `ExceptionInfo` will also catch stackless exceptions
+There are `!se-info` (like `prom/!`) and `!wrap-se-info` (like `prom/!wrap`) macros meant for use with facilities in
+`promenade.core`. You can use these in conjunction with `se-info` for fast error communication.
+
+### Caveat
+
+In CLJS, catching `promenade.util.StacklessExceptionInfo` also catches `ExceptionInfo` instances because both share the
+same (JavaScript) prototype. The recommended approach is to catch `ExceptionInfo` and then use `se-info?` to detect the
+stackless exceptions if required.
 
 
 ## Entities
