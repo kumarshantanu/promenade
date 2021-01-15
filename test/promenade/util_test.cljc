@@ -71,7 +71,18 @@
             (try
               (throw (prut/se-info "test"))
               (catch StacklessExceptionInfo e
-                :foo)))))))
+                :foo))))
+      (is (= :foo
+            (try
+              (throw (prut/se-info "test"))
+              (catch ExceptionInfo _
+                :foo))))
+      #?(:cljs "This test is broken in CLJS because StacklessExceptionInfo shares the prototype of ExceptionInfo"
+          :clj (is (thrown? ExceptionInfo
+                     (try
+                       (throw (ex-info "test" {}))
+                       (catch StacklessExceptionInfo _
+                         :foo))))))))
 
 
 (deftest test-!se-info

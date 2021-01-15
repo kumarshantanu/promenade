@@ -10,7 +10,7 @@
 
 package promenade.util;
 
-import clojure.lang.IExceptionInfo;
+import clojure.lang.ExceptionInfo;
 import clojure.lang.IPersistentMap;
 
 /**
@@ -19,22 +19,17 @@ import clojure.lang.IPersistentMap;
  *
  */
 @SuppressWarnings("serial")
-public class StacklessExceptionInfo extends RuntimeException implements IExceptionInfo {
+public class StacklessExceptionInfo extends ExceptionInfo {
 
     private static final String CLASS_NAME_PREFIX = StacklessExceptionInfo.class.getName() + ": ";
 
-    public final IPersistentMap data;
-
     public StacklessExceptionInfo(String message, IPersistentMap data) {
-        super(message, /* cause */ null, /* enableSuppression */ true, /* writeableStackTrace */ false);
-        if (data == null) {
-            throw new IllegalArgumentException("Additional data must be non-nil");
-        }
-        this.data = data;
+        super(message, data);
     }
 
-    public IPersistentMap getData() {
-        return data;
+    @Override
+    public synchronized Throwable fillInStackTrace() {
+        return this;
     }
 
     @Override
