@@ -2,7 +2,6 @@
 
 ## Todo
 
-- [Todo] Adaptation of state monad
 - [Todo] Support for extensible, pattern-matching bind on constrained context
   - Enumeration (pattern match on individual values)
   - Range (pattern match on range groups)
@@ -14,8 +13,14 @@
   - [Idea] Bulkheads / semaphores
 
 
-## [WIP] 0.8.0 / 2021-January-??
+## 0.8.0-alpha3 / 2021-January-20
 
+- [Idea] Introduce MultiValue type for carrying multiple values
+  - Subsumes state monad functionality
+  - Behaves like a map - `contains?`, `get` etc work
+  - Add support for binding macros e.g. `either->`
+    - `(mul [x ...])` returns multi-value with additional attributes
+    - `:promenade/value` retrieves the value from previous step
 - Make `se-info` a drop-in replacement for `ex-info`
   - Make `promenade.util.StacklessExceptionInfo` a subclass of `ExceptionInfo` on the JVM (already so in CLJS)
   - Update documentation
