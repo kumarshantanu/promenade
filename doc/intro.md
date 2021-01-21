@@ -6,7 +6,8 @@ computation at a higher level. You can use Promenade in a new project or refacto
 ## Require namespaces
 
 ```clojure
-(require '[promenade.core :as prom])
+(require '[promenade.core :as prom]
+         '[promenade.util :as prut])
 ```
 
 ### A Simple Example
@@ -172,8 +173,8 @@ returns a failure. Once the `(cancel-order order-id failure)` step returns failu
 called with that failure argument to take corrective action and return a failure again. If `check-inventory`
 was successful then `process-order` is called, followed by `fulfil-order` on success.
 
-A failure-handler may or may not recover from a _failure_, hence they may return either _failure_ (via `prom/failure`) or _success_
-(any value that is not an error context).
+A failure-handler may or may not recover from a _failure_, hence they may return either _failure_ (via `prom/failure`)
+or _success_ (any value that is not an error context).
 However, a failure-handler is only invoked if the prior result is a _failure_. Specifically, in the above example,
 `cancel-order` would deliberately return a _failure_ so that the control can flow to the next step
 `stock-replenish-init`.
@@ -182,8 +183,8 @@ However, a failure-handler is only invoked if the prior result is a _failure_. S
 
 ### Expressing a value or its absence thereof
 
-Some times you may want to represent the absence of a value, expressed as `prom/nothing` (a Nothing context). This is a special
-value that may participate in other bind chains in Promenade. Any regular value that is not _Nothing_
+Some times you may want to represent the absence of a value, expressed as `prom/nothing` (a Nothing context). This is a
+special value that may participate in other bind chains in Promenade. Any regular value that is not _Nothing_
 (predicate `prom/nothing?`) is considered presence of a value.
 
 #### The bind-maybe variants
@@ -303,9 +304,10 @@ For example, the code snippet below enhances upon the use-case we saw in success
   (prom/trial->   [generate-error]))        ; Handle any exceptions. Any above step could have returned a Thrown
 ```
 
-Remember that all of the behind-the-scene bind functions will flow "unknown" context through to the next. Thus it is perfectly
-fine for *any* of the steps above to return whatever kind of context they want. Suppose you've written every one of the
-functions above by wrapping the body with a `(prom/! ...)`. This means that any unexpected exception would naturally flow down to the final `trial->` error handler.
+Remember that all of the behind-the-scene bind functions will flow "unknown" context through to the next. Thus it is
+perfectly fine for *any* of the steps above to return whatever kind of context they want. Suppose you've written every
+one of the functions above by wrapping the body with a `(prom/! ...)`. This means that any unexpected exception would
+naturally flow down to the final `trial->` error handler.
 
 ### Intermixing bind functions
 
@@ -463,3 +465,79 @@ below we post and schedule a job and then try to determine the composite status:
      s (prom/mfailure sch)] {:status :partial-success}
     :else                   (prom/fail :failure)))
 ```
+
+
+## Faster exceptions for communicating errors
+
+As a language Clojure/Script embraces the host, which reflects in dealing with errors via exceptions. Traditionally,
+exceptions are a means for debugging as well as communicating the error that happened. However, there are situations
+where we already anticipate the type of error and do not need any debugging (stack trace) support for that. Building
+up the stack trace has a significant cost that we need not bear when simply communicating the error. Promenade added
+support for fast stackless exception in version `0.8.0` for communicating such errors.
+
+```clojure
+;; throwing
+(throw (prut/se-info "Order fetching failed" {:order-id order-id}))
+
+;; catching
+(catch promenade.util.StacklessExceptionInfo ex ...)
+
+;; detecting
+(prut/se-info? ex)
+```
+
+This is modeled after Clojure's `ex-info`, and is compatible with `ex-data` and (Clojure 1.10) `ex-message` functions.
+In fact, `se-info` is a drop-in replacement for `ex-info` (`promenade.util.StacklessExceptionInfo` is a sub-class of
+`ExceptionInfo`) and catching `ExceptionInfo` also catches `promenade.util.StacklessExceptionInfo` instances.
+
+### Using `se-info` with `promenade.core`
+
+There are `!se-info` (like `prom/!`) and `!wrap-se-info` (like `prom/!wrap`) macros meant for use with facilities in
+`promenade.core`. You can use these in conjunction with `se-info` for fast error communication.
+
+### Caveat
+
+In CLJS, catching `promenade.util.StacklessExceptionInfo` also catches `ExceptionInfo` instances because both share the
+same (JavaScript) prototype. The recommended approach is to catch `ExceptionInfo` and then use `se-info?` to detect the
+stackless exceptions if required.
+
+
+## Entities
+
+Maps are great in Clojure, except they inherently bear no identity. Records (using `defrecord`) do a great job at
+associating a name to an entity and can be easily identified with `(instance? RecordName record)`. Promenade makes
+it a little smoother to create entities for doing so.
+
+```clojure
+;; --- records with implicit single field (called 'value')
+;;
+(prut/defentity ProductCode)  ; similar to (defrecord ProductCode [value])
+
+(def prod-code (-> ProductCode "JCF-69WQ45R"))
+
+(:value prod-code)
+
+(ProductCode? prod-code)  ; defentity creates a predicate to test instances
+
+
+;; --- records with explicit fields
+;;
+(prut/defentity Location [latitude longitude])  ; syntax similar to defrecord
+
+(Location? (->Location 8.6705 115.2126))        ; defentity created predicate
+```
+
+
+## Fast, custom failures
+
+Failures are easy to create with `(prom/fail data)`. It involves the overhead of wrapping/unwrapping arbitrary data in
+an internal `Failure` object. Moreover, it lacks identity of the failure. These issues can be fixed with custom failure
+entities, as shown below:
+
+```clojure
+(defailure OrderFetchFailure [order-id])  ; like an ordinary defrecord
+
+(OrderFetchFailure? failure)              ; defailure created predicate
+```
+
+When you instantiate a failure entity using `defailure` it is already a failure, needing no call to `prom/fail`.

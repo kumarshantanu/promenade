@@ -23,11 +23,11 @@
 ;;~~~~~~~~~~~~~~~~~~~~
 ;; Context predicates
 
-(defn failure? [x] "Return true if argument is a Failure, false otherwise." (satisfies? t/IFailure x))
-(defn nothing? [x] "Return true if argument is a Nothing, false otherwise." (satisfies? t/INothing x))
-(defn thrown?  [x] "Return true if argument is a Thrown, false otherwise."  (satisfies? t/IThrown x))
-(defn context? [x] "Return true if argument is a Context, false otherwise." (satisfies? t/IContext x))
-(defn free?    [x] "Return true if argument is Context-free (not a Context), false otherwise." (not (context? x)))
+(defn failure? [x] "Return `true` if argument is a _Failure_, `false` otherwise." (satisfies? t/IFailure x))
+(defn nothing? [x] "Return `true` if argument is a _Nothing_, `false` otherwise." (satisfies? t/INothing x))
+(defn thrown?  [x] "Return `true` if argument is a _Thrown_, `false` otherwise."  (satisfies? t/IThrown x))
+(defn context? [x] "Return `true` if argument is a _Context_, `false` otherwise." (satisfies? t/IContext x))
+(defn free?    [x] "Return `true` if argument is Context-free (not a _Context_), `false` otherwise." (not (context? x)))
 
 
 ;;~~~~~~~~~~~~~~~~~~~
@@ -48,7 +48,9 @@
 ;; Make terminal context
 
 (defn fail
-  "Turn given argument into 'failure' unless it is already a context."
+  "Turn given argument into 'failure' unless it is already a context.
+
+  See: [[promenade.util/defailure]]"
   ([x] (cond
          (failure? x) x
          (context? x) (throw (ex-info "Cannot derive failure from other context" {:context x}))
@@ -83,7 +85,9 @@
 
 
 (defmacro !
-  "Evaluate given form and return it; on exception return the exception as thrown context."
+  "Evaluate given form and return it; on exception return the exception as thrown context.
+
+  See: [[promenade.util/!se-info]]"
   ([x]
     ;; In CLJS `defmacro` is called by ClojureJVM, hence reader conditionals always choose :clj -
     ;; so we discover the environment using a hack (:ns &env), which returns truthy for CLJS.
@@ -92,7 +96,10 @@
     `(! ~(if (:ns &env) `js/Error `Exception) ~x))
   ([catch-class x] (let [catch-expr    (fn [clazz]
                                          (i/expected symbol? "exception class name" clazz)
-                                         `(catch ~clazz ex# (i/->Thrown ex#)))
+                                         `(catch ~clazz ex#
+                                            (if (thrown? ex#)
+                                              ex#
+                                              (i/->Thrown ex#))))
                          catch-clauses (cond
                                          (symbol? catch-class) [(catch-expr catch-class)]
                                          (vector? catch-class) (map catch-expr catch-class)
@@ -103,7 +110,9 @@
 
 
 (defmacro !wrap
-  "Wrap given function such that on exception it returns the exception as a thrown context."
+  "Wrap given function such that on exception it returns the exception as a thrown context.
+
+  See: [[promenade.util/!wrap-se-info]]"
   ([f]
     `(fn [& args#]
        (! (apply ~f args#))))
@@ -118,14 +127,16 @@
 (defn deref-context
   "Deref argument if it is a context, return as it is otherwise."
   ([x] (if (context? x)
-         (if (i/derefable? x)
-           (deref x)
-           (throw (ex-info "Context does not support deref" {:context x})))
+         (cond
+           (i/holder? x)    (t/-obtain x)
+           (i/derefable? x) (deref x)
+           :else            (throw (ex-info "Context does not support promenade.type/IHolder or deref" {:context x})))
          x))
   ([x default] (if (context? x)
-                 (if (i/derefable? x)
-                   (deref x)
-                   default)
+                 (cond
+                   (i/holder? x)    (t/-obtain x)
+                   (i/derefable? x) (deref x)
+                   :else            default)
                  x)))
 
 
@@ -133,11 +144,14 @@
 
 
 (defn branch
-  "Given an optional fallback fn (fn [x]) (default: clojure.core/identity), compose it with branch execution as per
+  "Given an optional fallback fn `(fn [x])` (default: `clojure.core/identity`), compose it with branch execution as per
   predicate. You may use this to compose a branching pipeline:
+
+  ```
   (-> identity
     (branch pred f)
-    (branch pred2 f2))"
+    (branch pred2 f2))
+  ```"
   ([pred f]
     (branch identity pred f))
   ([fallback pred f]
@@ -150,16 +164,16 @@
 (defn bind-either
   "Given a context mval (success or failure) bind it with a function of respective type, i.e. success-f or failure-f.
   See:
-    either->
-    either->>
-    either-as->
-    bind-maybe
-    bind-trial"
+    [[either->]]
+    [[either->>]]
+    [[either-as->]]
+    [[bind-maybe]]
+    [[bind-trial]]"
   ([mval success-f] (if (context? mval)
                       mval
                       (success-f mval)))
   ([mval failure-f success-f] (cond
-                                (failure? mval) (failure-f (deref mval))
+                                (failure? mval) (failure-f (t/-obtain mval))
                                 (context? mval) mval
                                 :otherwise      (success-f mval))))
 
@@ -167,11 +181,11 @@
 (defn bind-maybe
   "Given a context mval (just or nothing) bind it with a function of respective type, i.e. just-f or nothing-f.
   See:
-    maybe->
-    maybe->>
-    maybe-as->
-    bind-either
-    bind-trial"
+    [[maybe->]]
+    [[maybe->>]]
+    [[maybe-as->]]
+    [[bind-either]]
+    [[bind-trial]]"
   ([mval just-f] (if (context? mval)
                    mval
                    (just-f mval)))
@@ -184,16 +198,16 @@
 (defn bind-trial
   "Given a context mval (value or exception) bind it with a function of respective type, i.e. result-f or thrown-f.
   See:
-    trial->
-    trial->>
-    trial-as->
-    bind-either
-    bind-maybe"
+    [[trial->]]
+    [[trial->>]]
+    [[trial-as->]]
+    [[bind-either]]
+    [[bind-maybe]]"
   ([mval result-f] (if (context? mval)
                      mval
                      (result-f mval)))
   ([mval thrown-f result-f] (cond
-                              (thrown? mval)  (thrown-f (deref mval))
+                              (thrown? mval)  (thrown-f (t/-obtain mval))
                               (context? mval) mval
                               :otherwise      (result-f mval))))
 
@@ -204,15 +218,15 @@
 (defn mfailure
   "Match argument as Failure, returning a match-result.
   See:
-    mnothing
-    mthrown
-    mlet
-    if-mlet
-    when-mlet
-    cond-mlet"
+    [[mnothing]]
+    [[mthrown]]
+    [[mlet]]
+    [[if-mlet]]
+    [[when-mlet]]
+    [[cond-mlet]]"
   ([x]
     (if (failure? x)
-      (i/->Match true (deref x))
+      (i/->Match true (t/-obtain x))
       (i/->Match false x)))
   ([x default]
     (if (failure? x)
@@ -223,12 +237,12 @@
 (defn mnothing
   "Match argument as Nothing, returning a match-result.
   See:
-    mfailure
-    mthrown
-    mlet
-    if-mlet
-    when-mlet
-    cond-mlet"
+    [[mfailure]]
+    [[mthrown]]
+    [[mlet]]
+    [[if-mlet]]
+    [[when-mlet]]
+    [[cond-mlet]]"
   [x value]
   (if (nothing? x)
     (i/->Match true value)
@@ -238,15 +252,15 @@
 (defn mthrown
   "Match argument as Thrown, returning a match-result.
   See:
-    mfailure
-    mnothing
-    mlet
-    if-mlet
-    when-mlet
-    cond-mlet"
+    [[mfailure]]
+    [[mnothing]]
+    [[mlet]]
+    [[if-mlet]]
+    [[when-mlet]]
+    [[cond-mlet]]"
   ([x]
     (if (thrown? x)
-      (i/->Match true (deref x))
+      (i/->Match true (t/-obtain x))
       (i/->Match false x)))
   ([x default]
     (if (thrown? x)
@@ -256,7 +270,7 @@
 
 (defmacro mdo
   "Evaluate body of code such that any context is returned as soon as it is encountered unexpectedly. However, context
-  matches are ignored. Return nil for empty body."
+  matches are ignored. Return `nil` for empty body."
   [& body]
   (if (empty? body)
     `nil
@@ -277,12 +291,12 @@
   "Bind symbols in the binding forms to their respective matching context and evaluate body of code in the lexical
   scope. If a non-matching context is encountered, return it without proceeding any further.
   See:
-    mfailure
-    mnothing
-    mthrown
-    if-mlet
-    when-mlet
-    cond-mlet"
+    [[mfailure]]
+    [[mnothing]]
+    [[mthrown]]
+    [[if-mlet]]
+    [[when-mlet]]
+    [[cond-mlet]]"
   [bindings & body]
   (i/expected vector? "vector of binding forms" bindings)
   (when (odd? (count bindings))
@@ -311,12 +325,12 @@
   scope. If a non-matching context is encountered, evaluate the `else` form independent of the binding context, or
   return a promenade.type.INothing instance when `else` is unspecified.
   See:
-    mfailure
-    mnothing
-    mthrown
-    mlet
-    when-mlet
-    cond-mlet"
+    [[mfailure]]
+    [[mnothing]]
+    [[mthrown]]
+    [[mlet]]
+    [[when-mlet]]
+    [[cond-mlet]]"
   ([bindings then]
     `(if-mlet ~bindings ~then nothing))
   ([bindings then else]
@@ -331,14 +345,14 @@
 
 (defmacro when-mlet
   "Bind symbols in the binding forms to their respective matching context and evaluate th body of code in the lexical
-  scope. If a non-matching context is encountered, return nil.
+  scope. If a non-matching context is encountered, return `nil`.
   See:
-    mfailure
-    mnothing
-    mthrown
-    mlet
-    if-mlet
-    cond-mlet"
+    [[mfailure]]
+    [[mnothing]]
+    [[mthrown]]
+    [[mlet]]
+    [[if-mlet]]
+    [[cond-mlet]]"
   [bindings & body]
   `(if-mlet ~bindings
      (mdo ~@body)
@@ -349,7 +363,7 @@
   "Given a set of match-bindings/expression pairs, match each binding vector one by one - upon full match evaluate
   respective expression in the lexical scope and return the result without proceeding any further. When a binding
   form is not a vector, evaluate it like an expression and a truthy value triggers evaluating respective expression.
-  When no match is found, return a promenade.type.INothing instance."
+  When no match is found, return a `promenade.type.INothing` instance."
   [& clauses]
   (when (odd? (count clauses))
     (i/expected "even number of test/expr clauses" clauses))
@@ -369,9 +383,16 @@
 
 
 (defmacro refn
-  "Given `accumulator` and `each` arguments placeholder and an S-expression to evaluate, return a reducing function
-  (fn [accumulator each]) that bails out on encountering a context.
-  Example: (reduce (refn [vs x] (if (odd? x) (conj vs (* x 2)) vs)) [] coll)"
+  "Given 'accumulator' and 'each' arguments placeholder and an S-expression to evaluate, return a reducing function
+  `(fn [accumulator each])` that bails out on encountering a context.
+  Example:
+  ```
+  (reduce (refn [vs x] (if (odd? x)
+                         (conj vs (* x 2))
+                         vs))
+          []
+          coll)
+  ```"
   ([argvec expr]
     `(refn context? ~argvec ~expr))
   ([context-pred argvec expr]
@@ -387,8 +408,8 @@
 
 
 (defn rewrap
-  "Given a reducing function (fn [val each]) wrap it such that it bails out on encountering a context.
-  Example: (reduce (rewrap f) init coll)"
+  "Given a reducing function `(fn [val each])` wrap it such that it bails out on encountering a context.
+  Example: `(reduce (rewrap f) init coll)`"
   ([f]
     (rewrap context? f))
   ([context-pred f]
@@ -401,8 +422,8 @@
 
 
 (defmacro reduce->
-  "Given a bind function (fn [mval alt-fn val-fn]) -> mval and one or more expressions in thread-first form,
-  reduce over the expressions returning the final result. Use clojure.core/reduced for early termination."
+  "Given a bind function `(fn [mval alt-fn val-fn]) -> mval` and one or more expressions in thread-first form,
+  reduce over the expressions returning the final result. Use `clojure.core/reduced` for early termination."
   [bind expr & forms]
   (-> (fn [form]
         (with-meta (if (seq? form)
@@ -413,8 +434,8 @@
 
 
 (defmacro reduce->>
-  "Given a bind function (fn [mval alt-fn val-fn]) -> mval and one or more expressions in thread-last form,
-  reduce over the expressions returning the final result. Use clojure.core/reduced for early termination."
+  "Given a bind function `(fn [mval alt-fn val-fn]) -> mval` and one or more expressions in thread-last form,
+  reduce over the expressions returning the final result. Use `clojure.core/reduced` for early termination."
   [bind expr & forms]
   (-> (fn [form]
         (with-meta (if (seq? form)
@@ -425,8 +446,8 @@
 
 
 (defmacro reduce-as->
-  "Given a bind function (fn [mval alt-fn val-fn]) -> mval, a name to bind and one or more expressions in thread-as
-  form, reduce over the expressions returning the final result. Use clojure.core/reduced for early termination."
+  "Given a bind function `(fn [mval alt-fn val-fn]) -> mval`, a name to bind and one or more expressions in thread-as
+  form, reduce over the expressions returning the final result. Use `clojure.core/reduced` for early termination."
   [bind expr name & forms]
   (i/expected symbol? "placeholder name to be a symbol" name)
   (-> (fn [form]
@@ -439,180 +460,189 @@
 
 
 (defmacro either->
-  "Thread-first expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
-  'success' intact. Use clojure.core/reduced for early termination.
+  "Thread-first expansion using [[bind-either]]. A vector form of one element `[x]` is applied only to 'failure' leaving
+  'success' intact. Use `clojure.core/reduced` for early termination.
   Example usage
-  -------------
+  ```
   (either-> (place-order)
     (check-inventory :foo)
     [(cancel-order :bar) process-order]
     fulfil-order)
+  ```
   See:
-    reduce->
-    bind-either
-    either->>
-    either-as->
-    maybe->
-    trial->"
+    [[reduce->]]
+    [[bind-either]]
+    [[either->>]]
+    [[either-as->]]
+    [[maybe->]]
+    [[trial->]]"
   [x & forms]
   `(reduce-> bind-either ~x ~@forms))
 
 
 (defmacro either->>
-  "Thread-last expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
-  'success' intact. Use clojure.core/reduced for early termination.
+  "Thread-last expansion using [[bind-either]]. A vector form of one element `[x]` is applied only to 'failure' leaving
+  'success' intact. Use `clojure.core/reduced` for early termination.
   Example usage
-  -------------
+  ```
   (either->> (place-order)
     (check-inventory :foo)
     [(cancel-order :bar) process-order]
     fulfil-order)
+  ```
   See:
-    reduce->>
-    bind-either
-    either->
-    either-as->
-    maybe->>
-    trial->>"
+    [[reduce->>]]
+    [[bind-either]]
+    [[either->]]
+    [[either-as->]]
+    [[maybe->>]]
+    [[trial->>]]"
   [x & forms]
   `(reduce->> bind-either ~x ~@forms))
 
 
 (defmacro either-as->
-  "Thread-anywhere expansion using bind-either. A vector form of one element [x] is applied only to 'failure' leaving
-  'success' intact. Use clojure.core/reduced for early termination.
+  "Thread-anywhere expansion using [[bind-either]]. A vector form of one element `[x]` is applied only to 'failure'
+  leaving 'success' intact. Use `clojure.core/reduced` for early termination.
   Example usage
-  -------------
+  ```
   (either-as-> (place-order) $
     (check-inventory $ :foo)
     [(cancel-order :bar $) process-order]
     (fulfil-order $))
+  ```
   See:
-    reduce-as->
-    bind-either
-    either->
-    either->>
-    maybe-as->
-    trial-as->"
+    [[reduce-as->]]
+    [[bind-either]]
+    [[either->]]
+    [[either->>]]
+    [[maybe-as->]]
+    [[trial-as->]]"
   [expr name & forms]
   `(reduce-as-> bind-either ~expr ~name ~@forms))
 
 
 (defmacro maybe->
-  "Thread-first expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
-  'just' intact. Use clojure.core/reduced for early termination.
+  "Thread-first expansion using [[bind-maybe]]. A vector form of one element `[x]` is applied only to 'nothing' leaving
+  'just' intact. Use `clojure.core/reduced` for early termination.
   Example usage
-  -------------
+  ```
   (maybe-> (find-order)
     (check-inventory :foo)
     [(cancel-order :bar) process-order]
     fulfil-order)
+  ```
   See:
-    reduce->
-    bind-maybe
-    maybe->>
-    maybe-as->
-    either->
-    trial->"
+    [[reduce->]]
+    [[bind-maybe]]
+    [[maybe->>]]
+    [[maybe-as->]]
+    [[either->]]
+    [[trial->]]"
   [x & forms]
   `(reduce-> bind-maybe ~x ~@forms))
 
 
 (defmacro maybe->>
-  "Thread-last expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
-  'just' intact. Use clojure.core/reduced for early termination.
+  "Thread-last expansion using [[bind-maybe]]. A vector form of one element `[x]` is applied only to 'nothing' leaving
+  'just' intact. Use `clojure.core/reduced` for early termination.
   Example usage
-  -------------
+  ```
   (maybe->> (find-order)
     (check-inventory :foo)
     [(cancel-order :bar) process-order]
     fulfil-order)
+  ```
   See:
-    reduce->>
-    bind-maybe
-    either->
-    either-as->
-    maybe->>
-    trial->>"
+    [[reduce->>]]
+    [[bind-maybe]]
+    [[either->]]
+    [[either-as->]]
+    [[maybe->>]]
+    [[trial->>]]"
   [x & forms]
   `(reduce->> bind-maybe ~x ~@forms))
 
 
 (defmacro maybe-as->
-  "Thread-anywhere expansion using bind-maybe. A vector form of one element [x] is applied only to 'nothing' leaving
-  'just' intact. Use clojure.core/reduced for early termination.
+  "Thread-anywhere expansion using [[bind-maybe]]. A vector form of one element `[x]` is applied only to 'nothing'
+  leaving 'just' intact. Use `clojure.core/reduced` for early termination.
   Example usage
-  -------------
+  ```
   (maybe-as-> (find-order) $
     (check-inventory $ :foo)
     [(cancel-order :bar) process-order]
     (fulfil-order $))
+  ```
   See:
-    reduce-as->
-    bind-maybe
-    maybe->
-    maybe->>
-    either-as->
-    trial-as->"
+    [[reduce-as->]]
+    [[bind-maybe]]
+    [[maybe->]]
+    [[maybe->>]]
+    [[either-as->]]
+    [[trial-as->]]"
   [expr name & forms]
   `(reduce-as-> bind-maybe ~expr ~name ~@forms))
 
 
 (defmacro trial->
-  "Thread-first expansion using bind-trial. A vector form of one element [x] is applied only to 'thrown' leaving
-  'result' intact. Use clojure.core/reduced for early termination.
+  "Thread-first expansion using [[bind-trial]]. A vector form of one element `[x]` is applied only to 'thrown' leaving
+  'result' intact. Use `clojure.core/reduced` for early termination.
   Example usage
-  -------------
+  ```
   (trial-> (place-order)
     (check-inventory :foo)
     [(cancel-order :bar) process-order]
     fulfil-order)
+  ```
   See:
-    reduce->
-    bind-trial
-    trial->>
-    trial-as->
-    either->
-    maybe->"
+    [[reduce->]]
+    [[bind-trial]]
+    [[trial->>]]
+    [[trial-as->]]
+    [[either->]]
+    [[maybe->]]"
   [x & forms]
   `(reduce-> bind-trial ~x ~@forms))
 
 
 (defmacro trial->>
-  "Thread-last expansion using bind-trial. A vector form of one element [x] is applied only to 'thrown' leaving
-  'result' intact. Use clojure.core/reduced for early termination.
+  "Thread-last expansion using [[bind-trial]]. A vector form of one element `[x]` is applied only to 'thrown' leaving
+  'result' intact. Use `clojure.core/reduced` for early termination.
   Example usage
-  -------------
+  ```
   (either->> (place-order)
     (check-inventory :foo)
     [(cancel-order :bar) process-order]
     fulfil-order)
+  ```
   See:
-    reduce->>
-    bind-trial
-    trial->
-    trial-as->
-    either->>
-    maybe->>"
+    [[reduce->>]]
+    [[bind-trial]]
+    [[trial->]]
+    [[trial-as->]]
+    [[either->>]]
+    [[maybe->>]]"
   [x & forms]
   `(reduce->> bind-trial ~x ~@forms))
 
 
 (defmacro trial-as->
-  "Thread-anywhere expansion using bind-trial. A vector form of one element [x] is applied only to 'thrown' leaving
-  'result' intact. Use clojure.core/reduced for early termination.
+  "Thread-anywhere expansion using [[bind-trial]]. A vector form of one element `[x]` is applied only to 'thrown'
+  leaving 'result' intact. Use `clojure.core/reduced` for early termination.
   Example usage
-  -------------
+  ```
   (either-as-> (place-order) $
     (check-inventory $ :foo)
     [(cancel-order :bar $) process-order]
     (fulfil-order $))
+  ```
   See:
-    reduce-as->
-    bind-trial
-    trial->
-    trial->>
-    either-as->
-    maybe-as->"
+    [[reduce-as->]]
+    [[bind-trial]]
+    [[trial->]]
+    [[trial->>]]
+    [[either-as->]]
+    [[maybe-as->]]"
   [expr name & forms]
   `(reduce-as-> bind-trial ~expr ~name ~@forms))

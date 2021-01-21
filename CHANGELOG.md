@@ -2,12 +2,45 @@
 
 ## Todo
 
-- [Todo] Adaptation of state monad
 - [Todo] Support for extensible, pattern-matching bind on constrained context
   - Enumeration (pattern match on individual values)
   - Range (pattern match on range groups)
 - [Todo] Utility abstractions (as value or context)
   - Enum
+- [Idea] Resilience primitives
+  - [Idea] Retries - doable via fallbacks
+  - [Idea] Circuit breakers
+  - [Idea] Bulkheads / semaphores
+
+
+## [WIP] 0.8.0 / 2021-January-??
+
+- [BREAKING CHANGE] Drop support for ClojureScript 1.9
+  - Due to `javax.xml.bind.DatatypeConverter` exceptions with Java 9+
+- [BREAKING CHANGE] Contexts holding value (e.g. failure and thrown) must implement `promenade.type/IHolder`
+  - New protocol `promenade.type/IHolder` is introduced
+    - To hold a value, as a substitute for `IDeref`
+    - Because `clojure.lang.IDeref` is a Java interface - cannot be extended to `java.lang.Throwable`
+  - Built-in failure and thrown implementations are updated to implement `promenade.type/IHolder`
+- Optimize exception handling by avoiding unwanted wrapping/unwrapping
+  - Overload `Throwable` (CLJ) and `js/Error` (CLJS) with `IThrown` and `IHolder`
+  - Do not wrap exception as `Thrown` if already a `Thrown` (true in most cases)
+- Add fast, stackless alternative to `ex-info`
+  - Drop-in replacement for `ex-info`
+  - Add Java class and CLJS type `promenade.util.StacklessExceptionInfo` - descendant of `ExceptionInfo`
+  - `promenade.util/se-info`
+  - `promenade.util/se-info?`
+  - `promenade.util/!se-info`
+  - `promenade.util/!wrap-se-info`
+- Add custom entity and failure definition support
+  - `promenade.util/defentity`
+  - `promenade.util/defailure`
+- Perf tests
+- Documentation
+  - Add docs for version `0.8.0`
+  - Docstring cross-ref
+  - Formatting for Cljdoc
+  - Add Cljdoc badge
 
 
 ## 0.7.2 / 2019-April-25
@@ -16,7 +49,6 @@
 
 
 ## 0.7.1 / 2019-February-20
-
 
 - Allow `recur` at the tail position in code body (impacting the following macros)
   - `promenade.core/mdo`

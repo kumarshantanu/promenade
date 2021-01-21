@@ -8,6 +8,7 @@
 
 
 (ns promenade.internal
+  "Internal implementation details of Promenade - likely to break across versions."
   (:require
     #?(:clj [clojure.pprint :as pp])
     [promenade.type :as t])
@@ -32,12 +33,17 @@
       :clj (instance? IDeref x)))
 
 
+(defn holder? [x]
+  (satisfies? t/IHolder x))
+
+
 ;; ----- context implementation -----
 
 
 (defrecord Failure [failure]
   t/IContext
   IDeref (#?(:clj deref :cljs -deref) [_] failure)
+  t/IHolder (-obtain [_] failure)
   t/IFailure)
 
 
@@ -49,6 +55,7 @@
 (defrecord Thrown  [thrown]
   t/IContext
   IDeref (#?(:clj deref :cljs -deref) [_] thrown)
+  t/IHolder (-obtain [_] thrown)
   t/IThrown)
 
 
@@ -61,6 +68,17 @@
 #?(:clj (defmethod pp/simple-dispatch Failure [x] ((get-method pp/simple-dispatch IRecord) x)))
 #?(:clj (defmethod pp/simple-dispatch Nothing [x] ((get-method pp/simple-dispatch IRecord) x)))
 #?(:clj (defmethod pp/simple-dispatch Thrown  [x] ((get-method pp/simple-dispatch IRecord) x)))
+
+
+;; Overload `java.lang.Throwable` (CLJ) and `js/Error` (CLJS) as `promenade.type/IThrown` so as to avoid wrapping
+;; and unwrapping of exceptions by `promenade.core/!` and `promenade.core/deref-context`. However, the caveat is,
+;; one can no more distinguish between thrown exceptions versus exceptions returned by functions (which is rare)
+;; in all Promenade binding context.
+(extend-type #?(:cljs js/Error
+                 :clj Throwable)
+  t/IContext
+  t/IHolder (-obtain [this] this)
+  t/IThrown)
 
 
 ;; ----- context matching support -----

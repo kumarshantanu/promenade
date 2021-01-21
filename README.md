@@ -1,6 +1,7 @@
 # promenade
 
 [![Build Status](https://travis-ci.org/kumarshantanu/promenade.svg)](https://travis-ci.org/kumarshantanu/promenade)
+[![cljdoc badge](https://cljdoc.org/badge/promenade/promenade)](https://cljdoc.org/d/promenade/promenade)
 
 Take program design oddities in stride with Clojure/ClojureScript.
 
@@ -65,7 +66,7 @@ $ lein do clean, cljs-test  # run tests in ClojureScript using NodeJS
 
 ## License
 
-Copyright © 2017-2019 Shantanu Kumar
+Copyright © 2017-2021 Shantanu Kumar
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
