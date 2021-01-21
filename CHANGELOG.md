@@ -13,7 +13,7 @@
   - [Idea] Bulkheads / semaphores
 
 
-## [WIP] 0.8.0 / 2021-January-??
+## 0.8.0 / 2021-January-22
 
 - [BREAKING CHANGE] Drop support for ClojureScript 1.9
   - Due to `javax.xml.bind.DatatypeConverter` exceptions with Java 9+
