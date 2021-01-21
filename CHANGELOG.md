@@ -13,31 +13,7 @@
   - [Idea] Bulkheads / semaphores
 
 
-## 0.8.0-alpha3 / 2021-January-20
-
-- [Idea] Introduce MultiValue type for carrying multiple values
-  - Subsumes state monad functionality
-  - Behaves like a map - `contains?`, `get` etc work
-  - Add support for binding macros e.g. `either->`
-    - `(mul [x ...])` returns multi-value with additional attributes
-    - `:promenade/value` retrieves the value from previous step
-- Make `se-info` a drop-in replacement for `ex-info`
-  - Make `promenade.util.StacklessExceptionInfo` a subclass of `ExceptionInfo` on the JVM (already so in CLJS)
-  - Update documentation
-- Add failure entities (`defailure`) to perf test
-
-
-## 0.8.0-alpha2 / 2021-January-14
-
-- [Idea] Make `promenade.util.StacklessExceptionInfo` a subclass of `ExceptionInfo` on the JVM? (already so in CLJS)
-- Documentation
-  - Add documentation for 0.8.0
-  - Docstring cross-reference
-  - Formatting for Cljdoc
-  - Add Cljdoc badge
-
-
-## 0.8.0-alpha1 / 2021-January-09
+## [WIP] 0.8.0 / 2021-January-??
 
 - [BREAKING CHANGE] Drop support for ClojureScript 1.9
   - Due to `javax.xml.bind.DatatypeConverter` exceptions with Java 9+
@@ -50,7 +26,8 @@
   - Overload `Throwable` (CLJ) and `js/Error` (CLJS) with `IThrown` and `IHolder`
   - Do not wrap exception as `Thrown` if already a `Thrown` (true in most cases)
 - Add fast, stackless alternative to `ex-info`
-  - Add Java class and CLJS type `promenade.util.StacklessExceptionInfo`
+  - Drop-in replacement for `ex-info`
+  - Add Java class and CLJS type `promenade.util.StacklessExceptionInfo` - descendant of `ExceptionInfo`
   - `promenade.util/se-info`
   - `promenade.util/se-info?`
   - `promenade.util/!se-info`
@@ -58,9 +35,12 @@
 - Add custom entity and failure definition support
   - `promenade.util/defentity`
   - `promenade.util/defailure`
-- [Todo] Documentation
-  - [Todo] Formatting for Cljdoc
-  - [Todo] Add Cljdoc badge
+- Perf tests
+- Documentation
+  - Add docs for version `0.8.0`
+  - Docstring cross-ref
+  - Formatting for Cljdoc
+  - Add Cljdoc badge
 
 
 ## 0.7.2 / 2019-April-25
